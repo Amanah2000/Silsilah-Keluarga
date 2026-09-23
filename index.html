@@ -3,69 +3,127 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SILSILAH KELUARGA - Sinkron HP</title>
+<title>SILSILAH KELUARGA - Vercel Auto Sync</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--bg:#0f172a;--card:#1e293b;--border:#334155;--text:#e2e8f0;--green:#22c55e;--blue:#3b82f6}
 *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
 body{background:var(--bg);color:var(--text);padding:12px}
-.header{display:flex;justify-content:space-between;align-items:center;background:var(--card);padding:12px 16px;border-radius:12px;border:1px solid var(--border);margin-bottom:12px}
+.header{display:flex;justify-content:space-between;align-items:center;background:var(--card);padding:12px 16px;border-radius:12px;border:1px solid var(--border);margin-bottom:12px;flex-wrap:wrap;gap:8px}
 .btn{padding:8px 14px;border-radius:8px;border:0;cursor:pointer;font-weight:600;font-size:13px}
-.btn-green{background:var(--green);color:#000}.btn-blue{background:var(--blue);color:#fff}.btn-dark{background:#334155;color:#fff}
+.btn-green{background:var(--green);color:#000}.btn-blue{background:var(--blue);color:#fff}.btn-dark{background:#334155;color:#fff}.btn-white{background:#fff;color:#000}
 .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px}
-.grid{display:grid;grid-template-columns:repeat(8,1fr);gap:8px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
 .grid input{padding:10px;border-radius:8px;border:1px solid var(--border);background:#0f172a;color:var(--text);width:100%;font-size:13px}
-.toolbar{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
-.search input{width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:#0f172a;color:var(--text);margin-top:10px}
 .tree{display:flex;flex-direction:column;align-items:center;gap:16px;padding:20px}
 .row{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
 .node{padding:12px 20px;border-radius:12px;min-width:140px;text-align:center;font-size:13px}
-.kakek{border:2px solid #22c55e;background:#052e16;color:#bbf7d0}.nenek{border:2px solid #22c55e;background:#052e16;color:#bbf7d0}
-.ayah{border:2px solid #3b82f6;background:#172554;color:#bfdbfe}.ibu{border:2px solid #ec4899;background:#4a044e;color:#fbcfe8}
-.anak{border:2px solid #86efac;background:#dcfce7;color:#14532d;min-width:180px}
-.line{width:2px;height:16px;background:#475569}
+.kakek{border:2px solid #22c55e;background:#052e16;color:#bbf7d0}.ayah{border:2px solid #3b82f6;background:#172554;color:#bfdbfe}.anak{border:2px solid #86efac;background:#dcfce7;color:#14532d;min-width:180px}
+.badge{padding:4px 8px;border-radius:6px;font-size:11px;background:#052e16;color:#22c55e;border:1px solid #22c55e}
 @media(max-width:800px){.grid{grid-template-columns:1fr 1fr}}
 </style>
 </head>
 <body>
 <div class="header">
-<div><h1>🌳 SILSILAH KELUARGA</h1><p style="font-size:11px;opacity:.7">Sinkron HP & Laptop</p></div>
-<div style="display:flex;gap:6px"><span id="clock" style="background:#1e293b;padding:6px 10px;border-radius:8px;font-size:11px;border:1px solid #334155">00:00</span><button class="btn btn-blue" onclick="window.print()">🖨️ Cetak</button></div>
+<div><h1>🌳 SILSILAH KELUARGA</h1><p style="font-size:11px;opacity:.7">VERCEL AUTO SYNC</p></div>
+<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+<span id="status" class="badge">☁️ Siap</span>
+<span id="userInfo" style="font-size:11px;opacity:.8"></span>
+<button id="loginBtn" class="btn btn-white" onclick="loginGoogle()">🔐 Login Google</button>
+<button id="logoutBtn" class="btn btn-dark" onclick="logout()" style="display:none">Keluar</button>
 </div>
-<div class="card">
-<h2 style="font-size:15px;margin-bottom:8px">+ Tambah Keluarga</h2>
+</div>
+
+<div class="card" id="setupCard">
+<h3>⚙️ Setup 1x Aja Pak (Tempel Kunci Supabase)</h3>
+<p style="font-size:12px;opacity:.8">Buka supabase.com -> New Project -> Project Settings -> API -> Copy URL & anon key</p>
+<input id="supaUrl" placeholder="https://xxxx.supabase.co" style="width:100%;padding:8px;border-radius:6px;background:#0f172a;border:1px solid #334155;color:#fff;margin:6px 0">
+<input id="supaKey" placeholder="eyJhbGciOi... ANON KEY" style="width:100%;padding:8px;border-radius:6px;background:#0f172a;border:1px solid #334155;color:#fff;margin-bottom:6px">
+<button class="btn btn-green" onclick="saveConfig()">💾 Simpan & Mulai</button>
+</div>
+
+<div class="card" id="mainCard" style="display:none">
+<h2 style="font-size:15px">+ Tambah Keluarga <span class="badge">☁️ Auto Sync ON</span></h2>
 <div class="grid">
 <input id="anak" placeholder="Nama Anak *">
-<input id="ayah" placeholder="Nama Ayah">
-<input id="ibu" placeholder="Nama Ibu">
+<input id="ayah" placeholder="Ayah">
+<input id="ibu" placeholder="Ibu">
 <input id="kakek" placeholder="Kakek">
-<input id="nenek" placeholder="Nenek">
-<input id="pasangan" placeholder="Pasangan">
-<input id="jml" type="number" placeholder="Jml Anak">
-<input id="alamat" placeholder="Alamat">
 </div>
-<div class="toolbar">
-<button class="btn btn-green" onclick="simpan()">+ Simpan</button>
-<button class="btn btn-dark" onclick="exportData()">📤 Export (Kirim ke HP)</button>
-<button class="btn btn-dark" onclick="document.getElementById('importFile').click()">📥 Import (Terima)</button>
-<input type="file" id="importFile" hidden accept=".json" onchange="importData(event)">
-<button class="btn btn-dark" onclick="shareWA()">📱 Share WA</button>
-<button class="btn btn-dark" style="background:#7f1d1d" onclick="hapusSemua()">🗑️ Hapus</button>
+<div style="display:flex;gap:8px;margin-top:10px">
+<button class="btn btn-green" onclick="simpan()">+ Simpan Auto Sync</button>
+<button class="btn btn-blue" onclick="loadData()">🔄 Refresh</button>
 </div>
-<div class="search"><input id="cari" placeholder="🔍 Cari..." oninput="render()"></div>
-<p style="margin-top:8px;font-size:11px;opacity:.7;color:#22c55e">💡 SINKRON: Laptop Export -> Kirim .json via WA -> HP Import -> JADI!</p>
+<input id="cari" placeholder="🔍 Cari..." oninput="render()" style="width:100%;padding:10px;border-radius:8px;border:1px solid #334155;background:#0f172a;color:#fff;margin-top:10px">
 </div>
-<div class="card"><div id="tree" class="tree"></div><div id="list" style="margin-top:12px"></div></div>
+
+<div class="card" id="treeCard" style="display:none"><div id="tree" class="tree"></div><div id="list"></div></div>
+
 <script>
-let data=JSON.parse(localStorage.getItem('silsilah_v3')||'[]');
-const $=id=>document.getElementById(id);
-function simpan(){const anak=$('anak').value.trim();if(!anak){alert('Isi Nama Anak Pak!');return}const obj={id:Date.now(),anak,ayah:$('ayah').value.trim(),ibu:$('ibu').value.trim(),kakek:$('kakek').value.trim(),nenek:$('nenek').value.trim(),pasangan:$('pasangan').value.trim(),jml:$('jml').value.trim(),alamat:$('alamat').value.trim()};data.unshift(obj);localStorage.setItem('silsilah_v3',JSON.stringify(data));['anak','ayah','ibu','kakek','nenek','pasangan','jml','alamat'].forEach(i=>$(i).value='');render();}
-function render(){const q=$('cari').value.toLowerCase();let f=data.filter(d=>JSON.stringify(d).toLowerCase().includes(q));const t=$('tree');if(f.length==0){t.innerHTML='<p style="opacity:.6">Belum ada data.</p>';$('list').innerHTML='';return}const d=f[0];t.innerHTML=`<div class="row"><div class="node kakek">👨 Kakek<br><b>${d.kakek||'-'}</b></div><div class="node nenek">👵 Nenek<br><b>${d.nenek||'-'}</b></div></div><div class="line"></div><div class="row"><div class="node ayah">👨 Ayah<br><b>${d.ayah||'-'}</b></div><div class="node ibu">👩 Ibu<br><b>${d.ibu||'-'}</b></div></div><div class="line"></div><div class="row"><div class="node anak">👦 ${d.anak}<br><small>Pasangan: ${d.pasangan||'-'} | Anak: ${d.jml||0}<br>${d.alamat||''}</small></div></div>`;let h='<div style="display:grid;gap:6px">';f.forEach(x=>{h+=`<div style="background:#0f172a;border:1px solid #334155;padding:8px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;font-size:12px"><div><b>${x.anak}</b> <span style="opacity:.7">bin ${x.ayah} & ${x.ibu} | ${x.alamat}</span></div><button onclick="hapus(${x.id})" style="background:#7f1d1d;color:#fff;border:0;padding:4px 8px;border-radius:6px">🗑️</button></div>`;});h+='</div>';$('list').innerHTML=h;}
-function hapus(id){if(confirm('Hapus Pak?')){data=data.filter(d=>d.id!=id);localStorage.setItem('silsilah_v3',JSON.stringify(data));render()}}
-function hapusSemua(){if(confirm('Hapus SEMUA Pak?')){data=[];localStorage.setItem('silsilah_v3',JSON.stringify(data));render()}}
-function exportData(){if(data.length==0){alert('Belum ada data Pak!');return}const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='silsilah-keluarga-'+new Date().toISOString().slice(0,10)+'.json';a.click();alert('File ter-download Pak! Kirim via WA ke HP lalu Import Pak.');}
-function importData(e){const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=function(ev){try{let imp=JSON.parse(ev.target.result);if(!Array.isArray(imp))throw 'err';let ids=new Set(data.map(d=>d.id));let baru=0;imp.forEach(d=>{if(!ids.has(d.id)){data.push(d);baru++}});if(baru==0){data=imp;baru=imp.length}localStorage.setItem('silsilah_v3',JSON.stringify(data));render();alert('Sukses Pak! '+baru+' data masuk!');}catch{alert('File tidak valid Pak!');}};r.readAsText(file);}
-function shareWA(){window.open('https://wa.me/?text='+encodeURIComponent('🌳 Silsilah: '+location.href),'_blank')}
-setInterval(()=>{$('clock').textContent=new Date().toLocaleTimeString('id-ID')},1000);render();
+let supaUrl = localStorage.getItem('supaUrl') || '';
+let supaKey = localStorage.getItem('supaKey') || '';
+if(supaUrl){ document.getElementById('supaUrl').value=supaUrl; document.getElementById('supaKey').value=supaKey; }
+let supabase=null; let user=null; let data=[];
+function initSupabase(){
+ if(!supaUrl ||!supaKey) return false;
+ supabase = window.supabase.createClient(supaUrl, supaKey);
+ document.getElementById('setupCard').style.display='none';
+ document.getElementById('mainCard').style.display='block';
+ document.getElementById('treeCard').style.display='block';
+ checkUser(); return true;
+}
+if(supaUrl) initSupabase();
+function saveConfig(){
+ supaUrl=document.getElementById('supaUrl').value.trim();
+ supaKey=document.getElementById('supaKey').value.trim();
+ if(!supaUrl ||!supaKey){ alert('Isi URL & KEY Pak!'); return; }
+ localStorage.setItem('supaUrl', supaUrl); localStorage.setItem('supaKey', supaKey);
+ initSupabase(); alert('Tersimpan Pak! Login Google Pak!');
+}
+async function checkUser(){
+ const { data: { session } } = await supabase.auth.getSession();
+ user = session?.user || null; updateUI(); if(user) loadData();
+}
+function updateUI(){
+ const loginBtn=document.getElementById('loginBtn'); const logoutBtn=document.getElementById('logoutBtn');
+ const info=document.getElementById('userInfo'); const status=document.getElementById('status');
+ if(user){ loginBtn.style.display='none'; logoutBtn.style.display='inline-block'; info.textContent='👤 '+user.email; status.textContent='☁️ Online: '+user.email; }
+ else { loginBtn.style.display='inline-block'; logoutBtn.style.display='none'; info.textContent=''; status.textContent='🔒 Login dulu Pak'; }
+}
+async function loginGoogle(){
+ if(!supabase){ alert('Isi config dulu Pak!'); return; }
+ const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options:{ redirectTo: window.location.href } });
+ if(error) alert(error.message);
+}
+async function logout(){ await supabase.auth.signOut(); location.reload(); }
+async function loadData(){
+ if(!user) return; document.getElementById('status').textContent='⏳ Loading...';
+ let { data: rows, error } = await supabase.from('keluarga').select('*').eq('user_id', user.id).order('created_at',{ascending:false});
+ if(error){ alert('Error: '+error.message+' - Buat tabel dulu di SQL Editor Pak!'); return; }
+ data = rows.map(r=>r.data); render(); document.getElementById('status').textContent='✅ Sync: '+rows.length+' data';
+}
+async function simpan(){
+ const anak=document.getElementById('anak').value.trim(); if(!anak){alert('Nama Anak wajib Pak!');return}
+ const obj={ id: Date.now(), anak, ayah: document.getElementById('ayah').value.trim(), ibu: document.getElementById('ibu').value.trim(), kakek: document.getElementById('kakek').value.trim() };
+ if(!user){ alert('Login dulu Pak!'); return; }
+ document.getElementById('status').textContent='☁️ Menyimpan...';
+ const { error } = await supabase.from('keluarga').insert({ user_id: user.id, data: obj });
+ if(error){ alert('Gagal: '+error.message); return; }
+ data.unshift(obj); document.getElementById('anak').value=''; document.getElementById('ayah').value=''; document.getElementById('ibu').value=''; document.getElementById('kakek').value=''; render();
+ document.getElementById('status').textContent='✅ Tersimpan!';
+}
+function render(){
+ const q=(document.getElementById('cari')?.value||'').toLowerCase(); let f=data.filter(d=>JSON.stringify(d).toLowerCase().includes(q));
+ const t=document.getElementById('tree'); if(f.length==0){ t.innerHTML='<p style="opacity:.6">Belum ada data Pak.</p>'; document.getElementById('list').innerHTML=''; return; }
+ const d=f[0]; t.innerHTML=`<div class="row"><div class="node kakek">👨 Kakek<br><b>${d.kakek||'-'}</b></div></div><div style="width:2px;height:16px;background:#475569"></div><div class="row"><div class="node ayah">👨 Ayah<br><b>${d.ayah||'-'}</b></div></div><div style="width:2px;height:16px;background:#475569"></div><div class="row"><div class="node anak">👦 ${d.anak}</div></div>`;
+ let h=''; f.forEach(x=>{ h+=`<div style="background:#0f172a;border:1px solid #334155;padding:8px;border-radius:8px;margin-bottom:4px;display:flex;justify-content:space-between;font-size:12px"><span><b>${x.anak}</b> bin ${x.ayah}</span><button onclick="hapus(${x.id})" style="background:#7f1d1d;color:#fff;border:0;padding:4px 8px;border-radius:6px">🗑️</button></div>`; }); document.getElementById('list').innerHTML=h;
+}
+async function hapus(id){
+ if(!confirm('Hapus Pak?')) return;
+ await supabase.from('keluarga').delete().eq('user_id', user.id).contains('data', {id});
+ data=data.filter(d=>d.id!=id); render();
+}
+if(supaUrl) supabase?.auth.onAuthStateChange((event, session)=>{ user=session?.user||null; updateUI(); if(user) loadData(); });
 </script>
 </body>
 </html>
