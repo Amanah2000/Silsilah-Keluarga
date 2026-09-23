@@ -91,6 +91,7 @@ async function tambah(){
   const {error} = await supabaseClient.from('anggota').insert([{nama, ayah, ibu}]);
   if(error){ alert('Gagal Pak: '+error.message); } else { document.getElementById('nama').value=''; loadData(); }
 }
+  
 
 document.addEventListener('DOMContentLoaded', init);
 </script>
