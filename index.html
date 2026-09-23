@@ -3,128 +3,96 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SILSILAH KELUARGA - Vercel Auto Sync</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<title>Silsilah Keluarga</title>
 <style>
-:root{--bg:#0f172a;--card:#1e293b;--border:#334155;--text:#e2e8f0;--green:#22c55e;--blue:#3b82f6}
-*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
-body{background:var(--bg);color:var(--text);padding:12px}
-.header{display:flex;justify-content:space-between;align-items:center;background:var(--card);padding:12px 16px;border-radius:12px;border:1px solid var(--border);margin-bottom:12px;flex-wrap:wrap;gap:8px}
-.btn{padding:8px 14px;border-radius:8px;border:0;cursor:pointer;font-weight:600;font-size:13px}
-.btn-green{background:var(--green);color:#000}.btn-blue{background:var(--blue);color:#fff}.btn-dark{background:#334155;color:#fff}.btn-white{background:#fff;color:#000}
-.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px}
-.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.grid input{padding:10px;border-radius:8px;border:1px solid var(--border);background:#0f172a;color:var(--text);width:100%;font-size:13px}
-.tree{display:flex;flex-direction:column;align-items:center;gap:16px;padding:20px}
-.row{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
-.node{padding:12px 20px;border-radius:12px;min-width:140px;text-align:center;font-size:13px}
-.kakek{border:2px solid #22c55e;background:#052e16;color:#bbf7d0}.ayah{border:2px solid #3b82f6;background:#172554;color:#bfdbfe}.anak{border:2px solid #86efac;background:#dcfce7;color:#14532d;min-width:180px}
-.badge{padding:4px 8px;border-radius:6px;font-size:11px;background:#052e16;color:#22c55e;border:1px solid #22c55e}
-@media(max-width:800px){.grid{grid-template-columns:1fr 1fr}}
+body{font-family:Arial;padding:20px;background:#f5f5f0;max-width:800px;margin:auto}
+.setup-box{background:white;padding:20px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.1)}
+input{width:100%;padding:12px;margin:8px 0;border:1px solid #ccc;border-radius:8px;box-sizing:border-box}
+button{background:#2e7d32;color:white;padding:12px 20px;border:none;border-radius:8px;cursor:pointer;width:100%;font-weight:bold}
+button:hover{background:#1b5e20}
+.card{background:white;padding:15px;margin:10px 0;border-radius:10px;box-shadow:0 1px 5px rgba(0,0,0,0.1)}
 </style>
 </head>
 <body>
-<div class="header">
-<div><h1>🌳 SILSILAH KELUARGA</h1><p style="font-size:11px;opacity:.7">VERCEL AUTO SYNC</p></div>
-<div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
-<span id="status" class="badge">☁️ Siap</span>
-<span id="userInfo" style="font-size:11px;opacity:.8"></span>
-<button id="loginBtn" class="btn btn-white" onclick="loginGoogle()">🔐 Login Google</button>
-<button id="logoutBtn" class="btn btn-dark" onclick="logout()" style="display:none">Keluar</button>
-</div>
+
+<div id="setup" class="setup-box">
+<h2>Setup 1x Aja Pak</h2>
+<p>Masukkan Supabase Pak:</p>
+<input id="url" placeholder="https://xxxxx.supabase.co">
+<input id="key" placeholder="eyJhbG... (anon key panjang)">
+<button onclick="saveConfig()">Simpan & Mulai</button>
+<p style="font-size:12px;color:gray;margin-top:10px">Setelah simpan, halaman akan reload otomatis Pak</p>
 </div>
 
-<div class="card" id="setupCard">
-<h3>⚙️ Setup 1x Aja Pak (Tempel Kunci Supabase)</h3>
-<p style="font-size:12px;opacity:.8">Buka supabase.com -> New Project -> Project Settings -> API -> Copy URL & anon key</p>
-<input id="supaUrl" placeholder="https://xxxx.supabase.co" style="width:100%;padding:8px;border-radius:6px;background:#0f172a;border:1px solid #334155;color:#fff;margin:6px 0">
-<input id="supaKey" placeholder="eyJhbGciOi... ANON KEY" style="width:100%;padding:8px;border-radius:6px;background:#0f172a;border:1px solid #334155;color:#fff;margin-bottom:6px">
-<button class="btn btn-green" onclick="saveConfig()">💾 Simpan & Mulai</button>
+<div id="app" style="display:none">
+<h2>🌳 Silsilah Keluarga</h2>
+<input id="nama" placeholder="Nama Anggota Baru">
+<input id="ayah" placeholder="Nama Ayah (opsional)">
+<input id="ibu" placeholder="Nama Ibu (opsional)">
+<button onclick="tambah()">+ Tambah Anggota</button>
+<div id="list"></div>
+<hr>
+<button onclick="resetConfig()" style="background:#c62828">Reset Setup</button>
 </div>
 
-<div class="card" id="mainCard" style="display:none">
-<h2 style="font-size:15px">+ Tambah Keluarga <span class="badge">☁️ Auto Sync ON</span></h2>
-<div class="grid">
-<input id="anak" placeholder="Nama Anak *">
-<input id="ayah" placeholder="Ayah">
-<input id="ibu" placeholder="Ibu">
-<input id="kakek" placeholder="Kakek">
-</div>
-<div style="display:flex;gap:8px;margin-top:10px">
-<button class="btn btn-green" onclick="simpan()">+ Simpan Auto Sync</button>
-<button class="btn btn-blue" onclick="loadData()">🔄 Refresh</button>
-</div>
-<input id="cari" placeholder="🔍 Cari..." oninput="render()" style="width:100%;padding:10px;border-radius:8px;border:1px solid #334155;background:#0f172a;color:#fff;margin-top:10px">
-</div>
-
-<div class="card" id="treeCard" style="display:none"><div id="tree" class="tree"></div><div id="list"></div></div>
-
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-let supaUrl = localStorage.getItem('supaUrl') || '';
-let supaKey = localStorage.getItem('supaKey') || '';
-if(supaUrl){ document.getElementById('supaUrl').value=supaUrl; document.getElementById('supaKey').value=supaKey; }
-let supabase=null; let user=null; let data=[];
-function initSupabase(){
- if(!supaUrl ||!supaKey) return false;
- supabase = window.supabase.createClient(supaUrl, supaKey);
- document.getElementById('setupCard').style.display='none';
- document.getElementById('mainCard').style.display='block';
- document.getElementById('treeCard').style.display='block';
- checkUser(); return true;
-}
-if(supaUrl) initSupabase();
+let supabaseClient = null;
+
 function saveConfig(){
- supaUrl=document.getElementById('supaUrl').value.trim();
- supaKey=document.getElementById('supaKey').value.trim();
- if(!supaUrl ||!supaKey){ alert('Isi URL & KEY Pak!'); return; }
- localStorage.setItem('supaUrl', supaUrl); localStorage.setItem('supaKey', supaKey);
- initSupabase(); alert('Tersimpan Pak! Login Google Pak!');
+  const u = document.getElementById('url').value.trim();
+  const k = document.getElementById('key').value.trim();
+  if(!u || !k){ alert('Isi dulu Pak URL & Key nya Pak!'); return; }
+  localStorage.setItem('supabase_url', u);
+  localStorage.setItem('supabase_anon_key', k);
+  alert('BERHASIL PAK! Reload Pak...');
+  location.reload();
 }
-async function checkUser(){
- const { data: { session } } = await supabase.auth.getSession();
- user = session?.user || null; updateUI(); if(user) loadData();
+
+function resetConfig(){
+  localStorage.clear();
+  location.reload();
 }
-function updateUI(){
- const loginBtn=document.getElementById('loginBtn'); const logoutBtn=document.getElementById('logoutBtn');
- const info=document.getElementById('userInfo'); const status=document.getElementById('status');
- if(user){ loginBtn.style.display='none'; logoutBtn.style.display='inline-block'; info.textContent='👤 '+user.email; status.textContent='☁️ Online: '+user.email; }
- else { loginBtn.style.display='inline-block'; logoutBtn.style.display='none'; info.textContent=''; status.textContent='🔒 Login dulu Pak'; }
+
+async function init(){
+  const u = localStorage.getItem('supabase_url');
+  const k = localStorage.getItem('supabase_anon_key');
+  if(!u || !k){
+    document.getElementById('setup').style.display='block';
+    document.getElementById('app').style.display='none';
+    return;
+  }
+  document.getElementById('setup').style.display='none';
+  document.getElementById('app').style.display='block';
+  
+  try{
+    supabaseClient = window.supabase.createClient(u, k);
+    loadData();
+  }catch(e){
+    alert('Kunci salah Pak! '+e.message);
+    resetConfig();
+  }
 }
-async function loginGoogle(){
- if(!supabase){ alert('Isi config dulu Pak!'); return; }
- const { error } = await supabase.auth.signInWithOAuth({ provider: 'google', options:{ redirectTo: window.location.href } });
- if(error) alert(error.message);
-}
-async function logout(){ await supabase.auth.signOut(); location.reload(); }
+
 async function loadData(){
- if(!user) return; document.getElementById('status').textContent='⏳ Loading...';
- let { data: rows, error } = await supabase.from('keluarga').select('*').eq('user_id', user.id).order('created_at',{ascending:false});
- if(error){ alert('Error: '+error.message+' - Buat tabel dulu di SQL Editor Pak!'); return; }
- data = rows.map(r=>r.data); render(); document.getElementById('status').textContent='✅ Sync: '+rows.length+' data';
+  const {data, error} = await supabaseClient.from('anggota').select('*').order('id');
+  if(error){ 
+    document.getElementById('list').innerHTML = '<p style="color:red">Buat dulu Pak tabel `anggota` di Supabase Pak: id, nama, ayah, ibu. Error: '+error.message+'</p>';
+    return;
+  }
+  document.getElementById('list').innerHTML = data.map(d=>`<div class="card"><b>${d.nama}</b><br><small>Ayah: ${d.ayah||'-'} | Ibu: ${d.ibu||'-'}</small></div>`).join('');
 }
-async function simpan(){
- const anak=document.getElementById('anak').value.trim(); if(!anak){alert('Nama Anak wajib Pak!');return}
- const obj={ id: Date.now(), anak, ayah: document.getElementById('ayah').value.trim(), ibu: document.getElementById('ibu').value.trim(), kakek: document.getElementById('kakek').value.trim() };
- if(!user){ alert('Login dulu Pak!'); return; }
- document.getElementById('status').textContent='☁️ Menyimpan...';
- const { error } = await supabase.from('keluarga').insert({ user_id: user.id, data: obj });
- if(error){ alert('Gagal: '+error.message); return; }
- data.unshift(obj); document.getElementById('anak').value=''; document.getElementById('ayah').value=''; document.getElementById('ibu').value=''; document.getElementById('kakek').value=''; render();
- document.getElementById('status').textContent='✅ Tersimpan!';
+
+async function tambah(){
+  const nama = document.getElementById('nama').value.trim();
+  const ayah = document.getElementById('ayah').value.trim();
+  const ibu = document.getElementById('ibu').value.trim();
+  if(!nama){ alert('Nama wajib Pak!'); return; }
+  const {error} = await supabaseClient.from('anggota').insert([{nama, ayah, ibu}]);
+  if(error){ alert('Gagal Pak: '+error.message); } else { document.getElementById('nama').value=''; loadData(); }
 }
-function render(){
- const q=(document.getElementById('cari')?.value||'').toLowerCase(); let f=data.filter(d=>JSON.stringify(d).toLowerCase().includes(q));
- const t=document.getElementById('tree'); if(f.length==0){ t.innerHTML='<p style="opacity:.6">Belum ada data Pak.</p>'; document.getElementById('list').innerHTML=''; return; }
- const d=f[0]; t.innerHTML=`<div class="row"><div class="node kakek">👨 Kakek<br><b>${d.kakek||'-'}</b></div></div><div style="width:2px;height:16px;background:#475569"></div><div class="row"><div class="node ayah">👨 Ayah<br><b>${d.ayah||'-'}</b></div></div><div style="width:2px;height:16px;background:#475569"></div><div class="row"><div class="node anak">👦 ${d.anak}</div></div>`;
- let h=''; f.forEach(x=>{ h+=`<div style="background:#0f172a;border:1px solid #334155;padding:8px;border-radius:8px;margin-bottom:4px;display:flex;justify-content:space-between;font-size:12px"><span><b>${x.anak}</b> bin ${x.ayah}</span><button onclick="hapus(${x.id})" style="background:#7f1d1d;color:#fff;border:0;padding:4px 8px;border-radius:6px">🗑️</button></div>`; }); document.getElementById('list').innerHTML=h;
-}
-async function hapus(id){
- if(!confirm('Hapus Pak?')) return;
- await supabase.from('keluarga').delete().eq('user_id', user.id).contains('data', {id});
- data=data.filter(d=>d.id!=id); render();
-}
-if(supaUrl) supabase?.auth.onAuthStateChange((event, session)=>{ user=session?.user||null; updateUI(); if(user) loadData(); });
+
+document.addEventListener('DOMContentLoaded', init);
 </script>
 </body>
 </html>
-
