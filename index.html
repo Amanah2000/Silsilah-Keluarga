@@ -1,99 +1,50 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Silsilah Keluarga</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Silsilah Keluarga V2</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-body{font-family:Arial;padding:20px;background:#f5f5f0;max-width:800px;margin:auto}
-.setup-box{background:white;padding:20px;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.1)}
-input{width:100%;padding:12px;margin:8px 0;border:1px solid #ccc;border-radius:8px;box-sizing:border-box}
-button{background:#2e7d32;color:white;padding:12px 20px;border:none;border-radius:8px;cursor:pointer;width:100%;font-weight:bold}
-button:hover{background:#1b5e20}
-.card{background:white;padding:15px;margin:10px 0;border-radius:10px;box-shadow:0 1px 5px rgba(0,0,0,0.1)}
+*{box-sizing:border-box;font-family:system-ui,sans-serif}
+body{background:#f5f5f0;margin:0;padding:12px}
+.card{background:#fff;border-radius:16px;padding:16px;max-width:600px;margin:auto;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+input{width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;margin:6px 0}
+.btn{width:100%;padding:12px;border:none;border-radius:10px;font-weight:700;cursor:pointer;margin:6px 0}
+.btn-green{background:#1b7a2d;color:#fff}.btn-red{background:#c62828;color:#fff}.btn-gray{background:#eee}
+.item{background:#fafafa;border:1px solid #eee;border-radius:12px;padding:12px;margin:8px 0}
+.node{border-left:3px solid #1b7a2d;padding-left:12px;margin:10px 0 0 12px}
+.name{font-weight:700;background:#e8f5e9;padding:4px 10px;border-radius:20px;display:inline-block}
 </style>
 </head>
 <body>
-
-<div id="setup" class="setup-box">
-<h2>Setup 1x Aja Pak</h2>
-<p>Masukkan Supabase Pak:</p>
-<input id="url" placeholder="https://xxxxx.supabase.co">
-<input id="key" placeholder="eyJhbG... (anon key panjang)">
-<button onclick="saveConfig()">Simpan & Mulai</button>
-<p style="font-size:12px;color:gray;margin-top:10px">Setelah simpan, halaman akan reload otomatis Pak</p>
-</div>
-
-<div id="app" style="display:none">
-<h2>🌳 Silsilah Keluarga</h2>
-<input id="nama" placeholder="Nama Anggota Baru">
-<input id="ayah" placeholder="Nama Ayah (opsional)">
-<input id="ibu" placeholder="Nama Ibu (opsional)">
-<button onclick="tambah()">+ Tambah Anggota</button>
+<div class="card">
+<h2>🌳 Silsilah Keluarga V2</h2>
+<div style="display:flex;gap:6px"><input id="q" placeholder="🔍 Cari nama..." oninput="render()"><button class="btn btn-gray" style="width:auto" onclick="window.print()">🖨️</button></div>
+<div id="setupBox" style="display:none"><input id="sbUrl" placeholder="https://xxxx.supabase.co"><input id="sbKey" placeholder="eyJhbG..."><button class="btn btn-green" onclick="saveConfig()">Simpan</button></div>
+<div id="mainBox">
+<input id="nama" placeholder="Nama Baru"><input id="ayah" placeholder="Ayah (opsional)"><input id="ibu" placeholder="Ibu (opsional)">
+<button class="btn btn-green" onclick="tambah()">+ Tambah / Update</button>
 <div id="list"></div>
-<hr>
-<button onclick="resetConfig()" style="background:#c62828">Reset Setup</button>
+<div style="margin-top:16px;border-top:2px solid #eee;padding-top:10px"><b>🌲 Pohon</b><div id="pohon"></div></div>
+<hr><button class="btn btn-red" onclick="resetSetup()">Reset Setup</button>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</div>
 <script>
-let supabaseClient = null;
-
-function saveConfig(){
-  const u = document.getElementById('url').value.trim();
-  const k = document.getElementById('key').value.trim();
-  if(!u || !k){ alert('Isi dulu Pak URL & Key nya Pak!'); return; }
-  localStorage.setItem('supabase_url', u);
-  localStorage.setItem('supabase_anon_key', k);
-  alert('BERHASIL PAK! Reload Pak...');
-  location.reload();
-}
-
-function resetConfig(){
-  localStorage.clear();
-  location.reload();
-}
-
-async function init(){
-  const u = localStorage.getItem('supabase_url');
-  const k = localStorage.getItem('supabase_anon_key');
-  if(!u || !k){
-    document.getElementById('setup').style.display='block';
-    document.getElementById('app').style.display='none';
-    return;
-  }
-  document.getElementById('setup').style.display='none';
-  document.getElementById('app').style.display='block';
-  
-  try{
-    supabaseClient = window.supabase.createClient(u, k);
-    loadData();
-  }catch(e){
-    alert('Kunci salah Pak! '+e.message);
-    resetConfig();
-  }
-}
-
-async function loadData(){
-  const {data, error} = await supabaseClient.from('anggota').select('*').order('id');
-  if(error){ 
-    document.getElementById('list').innerHTML = '<p style="color:red">Buat dulu Pak tabel `anggota` di Supabase Pak: id, nama, ayah, ibu. Error: '+error.message+'</p>';
-    return;
-  }
-  document.getElementById('list').innerHTML = data.map(d=>`<div class="card"><b>${d.nama}</b><br><small>Ayah: ${d.ayah||'-'} | Ibu: ${d.ibu||'-'}</small></div>`).join('');
-}
-
-async function tambah(){
-  const nama = document.getElementById('nama').value.trim();
-  const ayah = document.getElementById('ayah').value.trim();
-  const ibu = document.getElementById('ibu').value.trim();
-  if(!nama){ alert('Nama wajib Pak!'); return; }
-  const {error} = await supabaseClient.from('anggota').insert([{nama, ayah, ibu}]);
-  if(error){ alert('Gagal Pak: '+error.message); } else { document.getElementById('nama').value=''; loadData(); }
-}
-  
-
-document.addEventListener('DOMContentLoaded', init);
+const DEFAULT_URL="https://aftvoyxwsmdcedvxehuh.supabase.co";
+const DEFAULT_KEY=""; // PASTE KEY BAPAK DISINI PAK BIAR PERMANEN!
+let supabaseUrl=localStorage.getItem('sb_url')||DEFAULT_URL;
+let supabaseKey=localStorage.getItem('sb_key')||DEFAULT_KEY;
+let client=null,data=[],editId=null;
+function getClient(){if(!supabaseUrl||!supabaseKey)return null;return supabase.createClient(supabaseUrl,supabaseKey);}
+function saveConfig(){localStorage.setItem('sb_url',document.getElementById('sbUrl').value);localStorage.setItem('sb_key',document.getElementById('sbKey').value);location.reload();}
+function resetSetup(){if(confirm('Reset?')){localStorage.clear();location.reload();}}
+function checkSetup(){client=getClient();if(!client){setupBox.style.display='block';mainBox.style.display='none';}else{setupBox.style.display='none';mainBox.style.display='block';load();}}
+async function load(){const{data:rows,error}=await client.from('anggota').select('*').order('created_at');if(error){list.innerHTML=error.message;return;}data=rows||[];render();}
+function render(){const q=document.getElementById('q').value.toLowerCase();let f=data.filter(d=>d.nama.toLowerCase().includes(q));let html='';f.forEach(d=>{html+=`<div class=item><b>${d.nama}</b><div style="color:#666;font-size:13px">Ayah:${d.ayah||'-'} Ibu:${d.ibu||'-'}</div><div style="display:flex;gap:6px;margin-top:6px"><button onclick="mulaiEdit(${d.id})" style="flex:1">✏️ Edit</button><button onclick="hapus(${d.id})" style="flex:1">🗑️ Hapus</button></div></div>`});list.innerHTML=html||'Belum ada Pak';let names=new Set(f.map(r=>r.nama));let roots=f.filter(r=>(!r.ayah||!names.has(r.ayah))&&(!r.ibu||!names.has(r.ibu)));let byParent={};f.forEach(r=>{if(r.ayah){byParent[r.ayah]=byParent[r.ayah]||[];byParent[r.ayah].push(r);}if(r.ibu){byParent[r.ibu]=byParent[r.ibu]||[];if(!byParent[r.ibu].find(x=>x.id==r.id))byParent[r.ibu].push(r);}});function rn(p,d){if(d>10)return'';let ch=byParent[p.nama]||[];return`<div class=node><div class=name>👤 ${p.nama}</div><div class=children>${ch.map(c=>rn(c,d+1)).join('')}</div></div>`}pohon.innerHTML=roots.map(r=>rn(r,0)).join('')||'<div style="color:#888">Tambah kakek/nenek dulu Pak sebagai akar Pak</div>';}
+async function tambah(){let n=nama.value.trim(),a=ayah.value.trim(),i=ibu.value.trim();if(!n)return alert('Isi nama Pak');if(editId){await client.from('anggota').update({nama:n,ayah:a,ibu:i}).eq('id',editId);editId=null;nama.placeholder='Nama Baru';}else{await client.from('anggota').insert([{nama:n,ayah:a,ibu:i}]);}nama.value='';ayah.value='';ibu.value='';load();}
+function mulaiEdit(id){let d=data.find(x=>x.id==id);editId=id;nama.value=d.nama;ayah.value=d.ayah||'';ibu.value=d.ibu||'';nama.placeholder='Edit mode Pak - klik Tambah untuk update Pak';window.scrollTo({top:0,behavior:'smooth'});render();}
+async function hapus(id){if(!confirm('Hapus Pak?'))return;await client.from('anggota').delete().eq('id',id);load();}
+checkSetup();
 </script>
 </body>
 </html>
