@@ -1,40 +1,4 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Silsilah Keluarga V2</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-*{box-sizing:border-box;font-family:system-ui,sans-serif}
-body{background:#f5f5f0;margin:0;padding:12px}
-.card{background:#fff;border-radius:16px;padding:16px;max-width:600px;margin:auto;box-shadow:0 2px 12px rgba(0,0,0,.08)}
-input{width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;margin:6px 0}
-.btn{width:100%;padding:12px;border:none;border-radius:10px;font-weight:700;cursor:pointer;margin:6px 0}
-.btn-green{background:#1b7a2d;color:#fff}.btn-red{background:#c62828;color:#fff}.btn-gray{background:#eee}
-.item{background:#fafafa;border:1px solid #eee;border-radius:12px;padding:12px;margin:8px 0}
-.node{border-left:3px solid #1b7a2d;padding-left:12px;margin:10px 0 0 12px}
-.name{font-weight:700;background:#e8f5e9;padding:4px 10px;border-radius:20px;display:inline-block}
-</style>
-</head>
-<body>
-<div class="card">
-<h2>🌳 Silsilah Keluarga V2</h2>
-<div style="display:flex;gap:6px"><input id="q" placeholder="🔍 Cari nama..." oninput="render()"><button class="btn btn-gray" style="width:auto" onclick="window.print()">🖨️</button></div>
-<div id="setupBox" style="display:none"><input id="sbUrl" placeholder="https://xxxx.supabase.co"><input id="sbKey" placeholder="eyJhbG..."><button class="btn btn-green" onclick="saveConfig()">Simpan</button></div>
-<div id="mainBox">
-<input id="nama" placeholder="Nama Baru"><input id="ayah" placeholder="Ayah (opsional)"><input id="ibu" placeholder="Ibu (opsional)">
-<button class="btn btn-green" onclick="tambah()">+ Tambah / Update</button>
-<div id="list"></div>
-<div style="margin-top:16px;border-top:2px solid #eee;padding-top:10px"><b>🌲 Pohon</b><div id="pohon"></div></div>
-<hr><button class="btn btn-red" onclick="resetSetup()">Reset Setup</button>
-</div>
-</div>
-<script>
-const DEFAULT_URL="https://aftvoyxwsmdcedvxehuh.supabase.co";
-const DEFAULT_KEY=""; // PASTE KEY BAPAK DISINI PAK BIAR PERMANEN!
-let supabaseUrl=localStorage.getItem('sb_url')||DEFAULT_URL;
-let supabaseKey=localStorage.getItem('sb_key')||DEFAULT_KEY;
-let client=null,data=[],editId=null;
+ let client=null,data=[],editId=null;
 function getClient(){if(!supabaseUrl||!supabaseKey)return null;return supabase.createClient(supabaseUrl,supabaseKey);}
 function saveConfig(){localStorage.setItem('sb_url',document.getElementById('sbUrl').value);localStorage.setItem('sb_key',document.getElementById('sbKey').value);location.reload();}
 function resetSetup(){if(confirm('Reset?')){localStorage.clear();location.reload();}}
