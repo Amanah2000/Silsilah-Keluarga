@@ -1,14 +1,25 @@
- let client=null,data=[],editId=null;
-function getClient(){if(!supabaseUrl||!supabaseKey)return null;return supabase.createClient(supabaseUrl,supabaseKey);}
-function saveConfig(){localStorage.setItem('sb_url',document.getElementById('sbUrl').value);localStorage.setItem('sb_key',document.getElementById('sbKey').value);location.reload();}
-function resetSetup(){if(confirm('Reset?')){localStorage.clear();location.reload();}}
-function checkSetup(){client=getClient();if(!client){setupBox.style.display='block';mainBox.style.display='none';}else{setupBox.style.display='none';mainBox.style.display='block';load();}}
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Silsilah V3 Pasangan</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>*{box-sizing:border-box;font-family:system-ui,sans-serif}body{background:#f5f5f0;margin:0;padding:12px}.card{background:#fff;border-radius:18px;padding:16px;max-width:650px;margin:auto;box-shadow:0 4px 20px rgba(0,0,0,.07)}input{width:100%;padding:13px;border:1px solid #ddd;border-radius:12px;margin:5px 0}.btn{width:100%;padding:13px;border:none;border-radius:12px;font-weight:700;margin:5px 0}.btn-green{background:#1b7a2d;color:#fff}.btn-red{background:#c62828;color:#fff}.item{background:#fafafa;border:1px solid #eee;border-radius:14px;padding:12px;margin:8px 0}.node{border-left:3px solid #1b7a2d;padding-left:12px;margin:12px 0 0 12px}.name{background:#e8f5e9;padding:6px 12px;border-radius:20px;font-weight:700;display:inline-block}.spouse{background:#fff0f3;padding:6px 12px;border-radius:20px;border:1px solid #ffc2c9;margin-left:6px;font-weight:700}</style>
+</head><body><div class="card"><h2>🌳 Silsilah V3 ❤️</h2>
+<input id="q" placeholder="🔍 Cari..." oninput="render()">
+<div id="setupBox" style="display:none"><input id="sbUrl" placeholder="URL"><input id="sbKey" placeholder="anon key"><button class="btn btn-green" onclick="localStorage.setItem('sb_url',sbUrl.value);localStorage.setItem('sb_key',sbKey.value);location.reload()">Simpan</button></div>
+<div id="mainBox">
+<input id="nama" placeholder="Nama"><div style="display:flex;gap:6px"><input id="ayah" placeholder="Ayah"><input id="ibu" placeholder="Ibu"></div>
+<input id="pasangan" placeholder="Pasangan (contoh: Mimin)">
+<button class="btn btn-green" id="btnTambah" onclick="tambah()">+ Tambah / Update</button>
+<div id="list"></div><div style="margin-top:18px;border-top:2px solid #eee;padding-top:12px"><b>🌲 Pohon</b><div id="pohon"></div></div>
+<hr><button class="btn btn-red" onclick="if(confirm('Reset?')){localStorage.clear();location.reload();}">Reset Setup</button>
+</div></div>
+<script>
+const DEFAULT_URL="https://aftvoyxwsmdcedvxehuh.supabase.co";const DEFAULT_KEY="";
+let supabaseUrl=localStorage.getItem('sb_url')||DEFAULT_URL,supabaseKey=localStorage.getItem('sb_key')||DEFAULT_KEY;
+let client=supabase.createClient(supabaseUrl,supabaseKey),data=[],editId=null;
 async function load(){const{data:rows,error}=await client.from('anggota').select('*').order('created_at');if(error){list.innerHTML=error.message;return;}data=rows||[];render();}
-function render(){const q=document.getElementById('q').value.toLowerCase();let f=data.filter(d=>d.nama.toLowerCase().includes(q));let html='';f.forEach(d=>{html+=`<div class=item><b>${d.nama}</b><div style="color:#666;font-size:13px">Ayah:${d.ayah||'-'} Ibu:${d.ibu||'-'}</div><div style="display:flex;gap:6px;margin-top:6px"><button onclick="mulaiEdit(${d.id})" style="flex:1">✏️ Edit</button><button onclick="hapus(${d.id})" style="flex:1">🗑️ Hapus</button></div></div>`});list.innerHTML=html||'Belum ada Pak';let names=new Set(f.map(r=>r.nama));let roots=f.filter(r=>(!r.ayah||!names.has(r.ayah))&&(!r.ibu||!names.has(r.ibu)));let byParent={};f.forEach(r=>{if(r.ayah){byParent[r.ayah]=byParent[r.ayah]||[];byParent[r.ayah].push(r);}if(r.ibu){byParent[r.ibu]=byParent[r.ibu]||[];if(!byParent[r.ibu].find(x=>x.id==r.id))byParent[r.ibu].push(r);}});function rn(p,d){if(d>10)return'';let ch=byParent[p.nama]||[];return`<div class=node><div class=name>👤 ${p.nama}</div><div class=children>${ch.map(c=>rn(c,d+1)).join('')}</div></div>`}pohon.innerHTML=roots.map(r=>rn(r,0)).join('')||'<div style="color:#888">Tambah kakek/nenek dulu Pak sebagai akar Pak</div>';}
-async function tambah(){let n=nama.value.trim(),a=ayah.value.trim(),i=ibu.value.trim();if(!n)return alert('Isi nama Pak');if(editId){await client.from('anggota').update({nama:n,ayah:a,ibu:i}).eq('id',editId);editId=null;nama.placeholder='Nama Baru';}else{await client.from('anggota').insert([{nama:n,ayah:a,ibu:i}]);}nama.value='';ayah.value='';ibu.value='';load();}
-function mulaiEdit(id){let d=data.find(x=>x.id==id);editId=id;nama.value=d.nama;ayah.value=d.ayah||'';ibu.value=d.ibu||'';nama.placeholder='Edit mode Pak - klik Tambah untuk update Pak';window.scrollTo({top:0,behavior:'smooth'});render();}
-async function hapus(id){if(!confirm('Hapus Pak?'))return;await client.from('anggota').delete().eq('id',id);load();}
-checkSetup();
-</script>
-</body>
-</html>
+function render(){let q=document.getElementById('q').value.toLowerCase(),f=data.filter(d=>d.nama.toLowerCase().includes(q)),html='';f.forEach(d=>{html+=`<div class=item><b>${d.nama}</b> ${d.pasangan?`❤️ ${d.pasangan}`:''}<div style="color:#666;font-size:13px">Ayah:${d.ayah||'-'} Ibu:${d.ibu||'-'} ${d.pasangan?'| Pasangan:'+d.pasangan:''}</div><div style="display:flex;gap:6px;margin-top:6px"><button onclick="mulaiEdit(${d.id})" style="flex:1">✏️ Edit</button><button onclick="hapus(${d.id})" style="flex:1">🗑️ Hapus</button></div></div>`});list.innerHTML=html;let names=new Set(f.map(r=>r.nama)),roots=f.filter(r=>(!r.ayah||!names.has(r.ayah))&&(!r.ibu||!names.has(r.ibu))),byParent={};f.forEach(r=>{if(r.ayah){byParent[r.ayah]=byParent[r.ayah]||[];byParent[r.ayah].push(r);}if(r.ibu){byParent[r.ibu]=byParent[r.ibu]||[];if(!byParent[r.ibu].find(x=>x.id==r.id))byParent[r.ibu].push(r);}});function rn(p,d){if(d>12)return'';let ch=byParent[p.nama]||[];ch=[...new Map(ch.map(x=>[x.id,x])).values()];return`<div style="border-left:3px solid #1b7a2d;padding-left:12px;margin:12px 0 0 12px"><div><span style="background:#e8f5e9;padding:6px 12px;border-radius:20px;font-weight:700">👤 ${p.nama}</span>${p.pasangan?`<span style="background:#fff0f3;padding:6px 12px;border-radius:20px;border:1px solid #ffc2c9;margin-left:6px">❤️ ${p.pasangan}</span>`:''}</div><div style="margin-left:8px;border-left:2px dashed #c8e6c9;padding-left:8px">${ch.map(c=>rn(c,d+1)).join('')}</div></div>`}pohon.innerHTML=roots.map(r=>rn(r,0)).join('');}
+async function tambah(){let n=nama.value.trim(),a=ayah.value.trim(),i=ibu.value.trim(),p=pasangan.value.trim();if(!n)return alert('Isi nama');let payload={nama:n,ayah:a||null,ibu:i||null,pasangan:p||null};let e;if(editId){e=(await client.from('anggota').update(payload).eq('id',editId)).error;}else{e=(await client.from('anggota').insert([payload])).error;}if(e){alert(e.message);return;}nama.value=ayah.value=ibu.value=pasangan.value='';editId=null;load();}
+function mulaiEdit(id){let d=data.find(x=>x.id==id);editId=id;nama.value=d.nama;ayah.value=d.ayah||'';ibu.value=d.ibu||'';pasangan.value=d.pasangan||'';window.scrollTo({top:0,behavior:'smooth'});}
+async function hapus(id){if(!confirm('Hapus?'))return;await client.from('anggota').delete().eq('id',id);load();}load();
+</script></body></html>
