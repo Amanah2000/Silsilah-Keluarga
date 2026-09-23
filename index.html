@@ -1,21 +1,71 @@
-<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Silsilah Keluarga</title>
-<style>:root{--bg:#0f172a;--card:#1e293b;--text:#e2e8f0;--border:#334155}.light{--bg:#f1f5f9;--card:#fff;--text:#0f172a;--border:#cbd5e1}body{font-family:system-ui;margin:0;background:var(--bg);color:var(--text)}header{padding:12px;background:var(--card);display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}.card{background:var(--card);margin:12px;padding:12px;border-radius:12px;border:1px solid var(--border)}input,select,button,textarea{padding:7px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);margin:2px}.btn{padding:7px 12px;font-weight:bold;cursor:pointer;font-size:12px}.green{background:#16a34a;color:#fff}.blue{background:#2563eb;color:#fff}.red{background:#dc2626;color:#fff}.gray{background:#475569;color:#fff}.orange{background:#ea580c;color:#fff}.node{background:var(--card);border:2px solid #16a34a;border-radius:12px;padding:10px 14px;min-width:160px;text-align:center}.tree{display:flex;flex-direction:column;align-items:center;gap:12px}.tree-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}.line{width:2px;height:14px;background:#666}table{width:100%;border-collapse:collapse;margin-top:10px;min-width:800px}th,td{border:1px solid var(--border);padding:6px;font-size:11px;text-align:center}.badge{padding:4px 8px;border-radius:8px;background:var(--bg);border:1px solid var(--border);font-size:11px}
-@media print{header,.no-print{display:none!important}body{background:#fff;color:#000}.card{background:#fff;border:none}.node{background:#fff!important;color:#000!important;border:2px solid #000!important}}
-</style></head><body>
-<header class="no-print"><div><b>🌳 SILSILAH KELUARGA</b><br><small>Aplikasi Keluarga Umum</small></div><div><span id="jamLive" class="badge">--:--:--</span> <button class="btn gray" onclick="toggleDark()">🌙</button> <button class="btn blue" onclick="window.print()">🖨️ Cetak</button></div></header>
-
-<div class="card no-print"><h3 style="margin:0 0 8px">+ Tambah Keluarga</h3><div style="display:flex;flex-wrap:wrap">
-<input id="f_nama" placeholder="Nama Anak" style="width:130px"><input id="f_ayah" placeholder="Nama Ayah" style="width:130px"><input id="f_ibu" placeholder="Nama Ibu" style="width:130px"><input id="f_kakek" placeholder="Kakek" style="width:110px"><input id="f_nenek" placeholder="Nenek" style="width:110px"><input id="f_pasangan" placeholder="Pasangan (jika ada)" style="width:130px"><input id="f_anak" placeholder="Jumlah Anak" type="number" style="width:90px"><input id="f_alamat" placeholder="Alamat / Asal" style="flex:1;min-width:140px"><button class="btn green" onclick="tambah()">+ Simpan</button></div><input id="cari" placeholder="🔍 Cari: nama ayah, ibu, anak, alamat..." onkeyup="tampil()" style="width:98%;margin-top:8px;padding:8px"></div>
-
-<div class="card"><div id="pohon" class="tree"></div><div style="overflow-x:auto;margin-top:14px"><table id="tbl"><thead><tr><th>Anak</th><th>Ayah</th><th>Ibu</th><th>Kakek</th><th>Nenek</th><th>Pasangan</th><th>Alamat</th><th class="no-print">Aksi</th></tr></thead><tbody></tbody></table></div></div>
-
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SILSILAH KELUARGA - Sinkron HP</title>
+<style>
+:root{--bg:#0f172a;--card:#1e293b;--border:#334155;--text:#e2e8f0;--green:#22c55e;--blue:#3b82f6}
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui}
+body{background:var(--bg);color:var(--text);padding:12px}
+.header{display:flex;justify-content:space-between;align-items:center;background:var(--card);padding:12px 16px;border-radius:12px;border:1px solid var(--border);margin-bottom:12px}
+.btn{padding:8px 14px;border-radius:8px;border:0;cursor:pointer;font-weight:600;font-size:13px}
+.btn-green{background:var(--green);color:#000}.btn-blue{background:var(--blue);color:#fff}.btn-dark{background:#334155;color:#fff}
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px}
+.grid{display:grid;grid-template-columns:repeat(8,1fr);gap:8px}
+.grid input{padding:10px;border-radius:8px;border:1px solid var(--border);background:#0f172a;color:var(--text);width:100%;font-size:13px}
+.toolbar{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.search input{width:100%;padding:10px;border-radius:8px;border:1px solid var(--border);background:#0f172a;color:var(--text);margin-top:10px}
+.tree{display:flex;flex-direction:column;align-items:center;gap:16px;padding:20px}
+.row{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.node{padding:12px 20px;border-radius:12px;min-width:140px;text-align:center;font-size:13px}
+.kakek{border:2px solid #22c55e;background:#052e16;color:#bbf7d0}.nenek{border:2px solid #22c55e;background:#052e16;color:#bbf7d0}
+.ayah{border:2px solid #3b82f6;background:#172554;color:#bfdbfe}.ibu{border:2px solid #ec4899;background:#4a044e;color:#fbcfe8}
+.anak{border:2px solid #86efac;background:#dcfce7;color:#14532d;min-width:180px}
+.line{width:2px;height:16px;background:#475569}
+@media(max-width:800px){.grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="header">
+<div><h1>🌳 SILSILAH KELUARGA</h1><p style="font-size:11px;opacity:.7">Sinkron HP & Laptop</p></div>
+<div style="display:flex;gap:6px"><span id="clock" style="background:#1e293b;padding:6px 10px;border-radius:8px;font-size:11px;border:1px solid #334155">00:00</span><button class="btn btn-blue" onclick="window.print()">🖨️ Cetak</button></div>
+</div>
+<div class="card">
+<h2 style="font-size:15px;margin-bottom:8px">+ Tambah Keluarga</h2>
+<div class="grid">
+<input id="anak" placeholder="Nama Anak *">
+<input id="ayah" placeholder="Nama Ayah">
+<input id="ibu" placeholder="Nama Ibu">
+<input id="kakek" placeholder="Kakek">
+<input id="nenek" placeholder="Nenek">
+<input id="pasangan" placeholder="Pasangan">
+<input id="jml" type="number" placeholder="Jml Anak">
+<input id="alamat" placeholder="Alamat">
+</div>
+<div class="toolbar">
+<button class="btn btn-green" onclick="simpan()">+ Simpan</button>
+<button class="btn btn-dark" onclick="exportData()">📤 Export (Kirim ke HP)</button>
+<button class="btn btn-dark" onclick="document.getElementById('importFile').click()">📥 Import (Terima)</button>
+<input type="file" id="importFile" hidden accept=".json" onchange="importData(event)">
+<button class="btn btn-dark" onclick="shareWA()">📱 Share WA</button>
+<button class="btn btn-dark" style="background:#7f1d1d" onclick="hapusSemua()">🗑️ Hapus</button>
+</div>
+<div class="search"><input id="cari" placeholder="🔍 Cari..." oninput="render()"></div>
+<p style="margin-top:8px;font-size:11px;opacity:.7;color:#22c55e">💡 SINKRON: Laptop Export -> Kirim .json via WA -> HP Import -> JADI!</p>
+</div>
+<div class="card"><div id="tree" class="tree"></div><div id="list" style="margin-top:12px"></div></div>
 <script>
-let data=JSON.parse(localStorage.getItem('silsilahUmum')||'[]');
-function updateJam(){document.getElementById('jamLive').innerText=new Date().toLocaleTimeString('id-ID');}setInterval(updateJam,1000);updateJam();
-function toggleDark(){document.body.classList.toggle('light');}
-function tambah(){let o={nama:document.getElementById('f_nama').value,ayah:document.getElementById('f_ayah').value,ibu:document.getElementById('f_ibu').value,kakek:document.getElementById('f_kakek').value,nenek:document.getElementById('f_nenek').value,pasangan:document.getElementById('f_pasangan').value,anak:document.getElementById('f_anak').value,alamat:document.getElementById('f_alamat').value};if(!o.nama){alert('Isi Nama Anak!');return;}data.push(o);localStorage.setItem('silsilahUmum',JSON.stringify(data));tampil();document.getElementById('f_nama').value='';}
-function tampil(){let tb=document.querySelector('#tbl tbody');tb.innerHTML='';let pohon=document.getElementById('pohon');pohon.innerHTML='';let cari=(document.getElementById('cari').value||'').toLowerCase();let fil=data.filter(r=>`${r.nama} ${r.ayah} ${r.ibu} ${r.kakek} ${r.nenek} ${r.pasangan} ${r.alamat}`.toLowerCase().includes(cari));if(fil.length>0){let r=fil[0];pohon.innerHTML=`<div class="tree-row"><div class="node">👴 Kakek<br><b>${r.kakek||'-'}</b></div><div class="node">👵 Nenek<br><b>${r.nenek||'-'}</b></div></div><div class="line"></div><div class="tree-row"><div class="node" style="border-color:#2563eb">👨 Ayah<br><b>${r.ayah||'-'}</b></div><div class="node" style="border-color:#db2777">👩 Ibu<br><b>${r.ibu||'-'}</b></div></div><div class="line"></div><div class="tree-row"><div class="node" style="border-color:#16a34a;background:#dcfce7;color:#000">🧒 ${r.nama}<br><small>Pasangan: ${r.pasangan||'-'} | Anak: ${r.anak||'0'}</small><br><small>${r.alamat||''}</small></div></div>`;}fil.forEach((r,i)=>{let idx=data.indexOf(r);tb.innerHTML+=`<tr><td><b>${r.nama}</b></td><td>${r.ayah}</td><td>${r.ibu}</td><td>${r.kakek}</td><td>${r.nenek}</td><td>${r.pasangan}</td><td>${r.alamat}</td><td class="no-print"><button class="btn blue" onclick="pilih(${idx})">🌳 Lihat</button><button class="btn red" onclick="hapus(${idx})">🗑️</button></td></tr>`;});}
-function pilih(i){let r=data[i];document.getElementById('cari').value=r.nama;tampil();}
-function hapus(i){if(confirm('Hapus?')){data.splice(i,1);localStorage.setItem('silsilahUmum',JSON.stringify(data));tampil();}}
-tampil();
-</script></body></html>
+let data=JSON.parse(localStorage.getItem('silsilah_v3')||'[]');
+const $=id=>document.getElementById(id);
+function simpan(){const anak=$('anak').value.trim();if(!anak){alert('Isi Nama Anak Pak!');return}const obj={id:Date.now(),anak,ayah:$('ayah').value.trim(),ibu:$('ibu').value.trim(),kakek:$('kakek').value.trim(),nenek:$('nenek').value.trim(),pasangan:$('pasangan').value.trim(),jml:$('jml').value.trim(),alamat:$('alamat').value.trim()};data.unshift(obj);localStorage.setItem('silsilah_v3',JSON.stringify(data));['anak','ayah','ibu','kakek','nenek','pasangan','jml','alamat'].forEach(i=>$(i).value='');render();}
+function render(){const q=$('cari').value.toLowerCase();let f=data.filter(d=>JSON.stringify(d).toLowerCase().includes(q));const t=$('tree');if(f.length==0){t.innerHTML='<p style="opacity:.6">Belum ada data.</p>';$('list').innerHTML='';return}const d=f[0];t.innerHTML=`<div class="row"><div class="node kakek">👨 Kakek<br><b>${d.kakek||'-'}</b></div><div class="node nenek">👵 Nenek<br><b>${d.nenek||'-'}</b></div></div><div class="line"></div><div class="row"><div class="node ayah">👨 Ayah<br><b>${d.ayah||'-'}</b></div><div class="node ibu">👩 Ibu<br><b>${d.ibu||'-'}</b></div></div><div class="line"></div><div class="row"><div class="node anak">👦 ${d.anak}<br><small>Pasangan: ${d.pasangan||'-'} | Anak: ${d.jml||0}<br>${d.alamat||''}</small></div></div>`;let h='<div style="display:grid;gap:6px">';f.forEach(x=>{h+=`<div style="background:#0f172a;border:1px solid #334155;padding:8px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;font-size:12px"><div><b>${x.anak}</b> <span style="opacity:.7">bin ${x.ayah} & ${x.ibu} | ${x.alamat}</span></div><button onclick="hapus(${x.id})" style="background:#7f1d1d;color:#fff;border:0;padding:4px 8px;border-radius:6px">🗑️</button></div>`;});h+='</div>';$('list').innerHTML=h;}
+function hapus(id){if(confirm('Hapus Pak?')){data=data.filter(d=>d.id!=id);localStorage.setItem('silsilah_v3',JSON.stringify(data));render()}}
+function hapusSemua(){if(confirm('Hapus SEMUA Pak?')){data=[];localStorage.setItem('silsilah_v3',JSON.stringify(data));render()}}
+function exportData(){if(data.length==0){alert('Belum ada data Pak!');return}const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='silsilah-keluarga-'+new Date().toISOString().slice(0,10)+'.json';a.click();alert('File ter-download Pak! Kirim via WA ke HP lalu Import Pak.');}
+function importData(e){const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=function(ev){try{let imp=JSON.parse(ev.target.result);if(!Array.isArray(imp))throw 'err';let ids=new Set(data.map(d=>d.id));let baru=0;imp.forEach(d=>{if(!ids.has(d.id)){data.push(d);baru++}});if(baru==0){data=imp;baru=imp.length}localStorage.setItem('silsilah_v3',JSON.stringify(data));render();alert('Sukses Pak! '+baru+' data masuk!');}catch{alert('File tidak valid Pak!');}};r.readAsText(file);}
+function shareWA(){window.open('https://wa.me/?text='+encodeURIComponent('🌳 Silsilah: '+location.href),'_blank')}
+setInterval(()=>{$('clock').textContent=new Date().toLocaleTimeString('id-ID')},1000);render();
+</script>
+</body>
+</html>
