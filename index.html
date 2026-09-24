@@ -4,7 +4,7 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Silsilah TAU - Rapi Final</title>
 <style>
-*{font-family:Consolas,monospace;box-sizing:border-box}
+ *{font-family:Consolas,monospace;box-sizing:border-box}
 body{margin:0;border:2px solid #000;background:#fff}
 .tabs{display:flex;position:sticky;top:0;z-index:10}.tabs button{flex:1;padding:14px;border:1.5px solid #000;background:#fff;font-weight:bold;cursor:pointer}
 .tabs button.active{background:#000;color:#fff}
@@ -29,8 +29,11 @@ body{margin:0;border:2px solid #000;background:#fff}
   display: inline-block;
 }
 </style>
+
 </head>
 <body>
+  <div style="width:100%; overflow-x:scroll; border:1px solid #ddd">
+  <div style="min-width:1800px; padding:20px;">
 <div class="tabs">
 <button id="bData" class="active" onclick="switchTab('data')">DATA</button>
 <button id="bPohon" onclick="switchTab('pohon')">POHON</button>
@@ -143,5 +146,7 @@ function renderPohon(){ let roots=buildTreeRapi(); let masduki = roots.find(r=> 
 function switchTab(t){ document.getElementById("bData").classList.toggle("active",t=="data"); document.getElementById("bPohon").classList.toggle("active",t=="pohon"); document.getElementById("dataWrap").style.display=t=="data"?"block":"none"; document.getElementById("pohonWrap").style.display=t=="pohon"?"block":"none"; if(t=="pohon") renderPohon(); }
 load();
 </script>
+        </div>
+</div>
 </body>
 </html>
