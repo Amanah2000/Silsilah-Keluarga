@@ -55,13 +55,10 @@ body{margin:0;border:2px solid #000}
 </div>
 </div>
 </div>
-
 <script>
-const SUPABASE_URL="https://rlbnwwafubdjoepdgsnv.supabase.co";
-const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsYm53d2FmdWJkam9lcGRnc252Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ1OTM2MDAsImV4cCI6MjA1MDE2OTYwMH0.Y2y4hK5y2y2z4d3u_3sJ0g_3p2bYx7z";
-let supa=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const SUPABASE_URL="https://aftvoyxwsmdcedvxehuh.supabase.co";
+const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmdHZveXh3c21kY2VkdnhlaHVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxMjQ4NzcsImV4cCI6MjEwNTcwMDg3N30.QERB57Nn6mTbUSKWwzVI_a6BVjxt9s77hV_IJFsHstM";
 let data=[]; let editIdx=-1;
-
 async function load(){
  let {data:d}=await supa.from("anggota").select("*").order("id");
  data=d||[]; render(); renderPohon();
