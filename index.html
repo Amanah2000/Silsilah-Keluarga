@@ -169,14 +169,34 @@ function buildTree(){
  return Object.values(map).filter(n=>!n.ayah ||!map[n.ayah]);
 }
 function nodeHTML(node,isRoot){
-  let foto1=node.foto_url?`<img src="${node.foto_url}" style="width:50px;height:50px;border:1.5px solid #000;object-fit:cover">`:`<div style="width:50px;height:50px;border:1.5px dashed #aaa;display:flex;align-items:center;justify-content:center;font-size:9px">NO FOTO</div>`;
-  let foto2=node.foto_pasangan_url?`<img src="${node.foto_pasangan_url}" style="width:50px;height:50px;border:1.5px solid #b00;object-fit:cover">`:`<div style="width:50px;height:50px;border:1.5px dashed #f99;display:flex;align-items:center;justify-content:center;font-size:9px">NO FOTO</div>`;
-  let tgl1=node.tgl_lahir?`<div style="font-size:9px">${node.tgl_lahir}</div>`:`<div style="font-size:9px;opacity:.5">-</div>`;
-  let tgl2=node.tgl_lahir_pasangan?`<div style="font-size:9px;color:#b00">${node.tgl_lahir_pasangan}</div>`:`<div style="font-size:9px;opacity:.5">-</div>`;
-  let nama1=`<b style="font-size:10px">${node.nama}</b>`;
-  let nama2=node.pasangan?`<b style="font-size:10px;color:#b00">${node.pasangan}</b>`:"";
-  let childs=node.children&&node.children.length?`<div style="display:flex;gap:12px;margin-top:20px;justify-content:center">${node.children.map(c=>`<div>${nodeHTML(c,false)}</div>`).join("")}</div>`:"";
-  return `<div style="display:flex;flex-direction:column;align-items:center"><div style="border:2px solid #000;padding:8px;background:${isRoot?'#ffe':'#fff'};text-align:center;min-width:180px"><div style="display:flex;gap:12px;justify-content:center"><div style="text-align:center">${foto1}${nama1}${tgl1}</div>${node.pasangan?`<div style="text-align:center">${foto2}${nama2}${tgl2}</div>`:""}</div></div>${childs}</div>`;
+  let foto1=node.foto_url?`<img src="${node.foto_url}" style="width:60px;height:60px;border:1.5px solid #000;object-fit:cover">`:`<div style="width:60px;height:60px;border:1.5px dashed #aaa;display:flex;align-items:center;justify-content:center;font-size:8px">NO FOTO</div>`;
+  let foto2=node.foto_pasangan_url?`<img src="${node.foto_pasangan_url}" style="width:60px;height:60px;border:1.5px solid #b00;object-fit:cover">`:`<div style="width:60px;height:60px;border:1.5px dashed #f99;display:flex;align-items:center;justify-content:center;font-size:8px">NO FOTO</div>`;
+  
+  let block1=`
+    <div style="display:flex;flex-direction:column;align-items:center;width:80px;text-align:center;gap:2px">
+      ${foto1}
+      <b style="font-size:10px;line-height:11px;word-break:break-word">${node.nama}</b>
+      <span style="font-size:9px">${node.tgl_lahir||''}</span>
+    </div>`;
+    
+  let block2=node.pasangan?`
+    <div style="display:flex;flex-direction:column;align-items:center;width:80px;text-align:center;gap:2px">
+      ${foto2}
+      <b style="font-size:10px;line-height:11px;color:#b00;word-break:break-word">${node.pasangan}</b>
+      <span style="font-size:9px;color:#b00">${node.tgl_lahir_pasangan||''}</span>
+    </div>`:"";
+
+  let childs=node.children&&node.children.length?`<div style="display:flex;gap:14px;margin-top:22px;justify-content:center">${node.children.map(c=>`<div>${nodeHTML(c,false)}</div>`).join("")}</div>`:"";
+  
+  return `<div style="display:flex;flex-direction:column;align-items:center">
+    <div style="border:2px solid #000;padding:10px 12px;background:${isRoot?'#ffe':'#fff'};min-width:190px">
+      <div style="display:flex;gap:16px;justify-content:center;align-items:flex-start">
+        ${block1}
+        ${block2}
+      </div>
+    </div>
+    ${childs}
+  </div>`;
 }
 function renderPohon(){
  let roots=buildTree(); 
