@@ -1,79 +1,23 @@
 <!DOCTYPE html>
-<html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Silsilah V15 Final Foto</title>
+<html><head><meta charset="UTF-8"><title>Silsilah TAU</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-*{box-sizing:border-box;font-family:monospace}body{margin:0;background:#fff}
-.header{display:flex;border-bottom:2px solid #000;position:sticky;top:0;background:#fff;z-index:10}
-.tab{flex:1;padding:14px;text-align:center;font-weight:700;cursor:pointer;border:none;background:#fff}
-.tab.active{background:#000;color:#fff}
-.page{display:none;padding:12px;max-width:800px;margin:auto}.page.show{display:block}
-input{width:100%;padding:11px;border:1px solid #000;margin:4px 0}
-.btn{padding:11px 14px;border:1px solid #000;background:#fff;font-weight:700;cursor:pointer}
-.btn-black{background:#000;color:#fff;width:100%}
-.item{border:1px solid #000;padding:8px 10px;margin:6px 0;display:flex;justify-content:space-between;cursor:pointer;align-items:center}
-.item img{width:36px;height:36px;object-fit:cover;border:1px solid #000;margin-right:8px}
-.box{display:inline-flex;align-items:center;gap:6px;border:1px solid #000;padding:6px 10px;background:#fff;margin:2px 0}
-.box img{width:28px;height:28px;object-fit:cover;border:1px solid #000}
-.node{margin-left:18px;border-left:1px solid #000;padding-left:14px;margin-top:10px;position:relative;break-inside:avoid}
-.line{position:absolute;left:-1px;top:14px;width:14px;height:1px;background:#000}
-.family{break-inside:avoid;margin-bottom:12px}
-.title{border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:14px}
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99;align-items:center;justify-content:center;padding:16px}
-.modal.show{display:flex}.modal-box{background:#fff;border:1px solid #000;padding:14px;width:100%;max-width:420px;max-height:90vh;overflow:auto}
-.preview-img{width:80px;height:80px;object-fit:cover;border:1px solid #000;display:block;margin:6px 0}
-.print-wrap{border:1px solid #000;padding:14px}
-@media print{.header,.no-print{display:none!important}@page{margin:10mm}}
-</style>
+<style>*{font-family:monospace}.tabs{display:flex}.tabs button{flex:1;padding:12px;border:1px solid #000}.active{background:#000;color:#fff}</style>
 </head><body>
-<div class="header" id="header"><button id="t1" class="tab active" onclick="showPage(1)">DATA</button><button id="t2" class="tab" onclick="showPage(2)">POHON</button></div>
-
-<div id="page1" class="page show">
-<div class="no-print"><input id="q" placeholder="Cari nama..." oninput="render()"><div style="display:flex;gap:6px"><input id="nama" placeholder="Nama Baru"><button onclick="tambah()" class="btn btn-black" style="width:110px;margin:4px 0">+ Tambah</button></div></div>
-<div id="list"></div>
-</div>
-
-<div id="page2" class="page">
-<div class="print-wrap"><div class="title"><b>Silsilah Keluarga Wahyudi</b><br><small id="infoHitung"></small></div><div id="pohon"></div></div>
-<div class="no-print" style="margin-top:12px;display:flex;gap:8px"><button class="btn" onclick="showPage(1)">← Kembali</button><button class="btn btn-black" onclick="window.print()">Cetak / PDF</button></div>
-<div class="no-print" style="margin-top:8px;display:flex;gap:6px"><input id="shareLink" readonly style="font-size:11px"><button class="btn" onclick="copyLink()">Copy Link Lihat</button></div>
-</div>
-
-<div id="modal" class="modal" onclick="if(event.target==this) tutup()"><div class="modal-box">
-<b>EDIT DATA</b><br><br>
-<img id="prevFoto" class="preview-img" style="display:none">
-<input type="file" id="e_fotoFile" accept="image/*" onchange="previewFoto(this)">
-<input id="e_nama" placeholder="Nama Lengkap">
-<label style="font-size:11px">Tgl Lahir:</label><input type="date" id="e_tgl">
-<input id="e_ayah" placeholder="Nama Ayah"><input id="e_ibu" placeholder="Nama Ibu"><input id="e_pasangan" placeholder="Nama Pasangan">
-<button class="btn btn-black" style="margin-top:8px" onclick="simpanEdit()">Simpan</button>
-<button class="btn" style="width:100%;margin-top:6px;background:#fee" onclick="hapusData()">Hapus</button>
-<button class="btn" style="width:100%;margin-top:6px" onclick="tutup()">Batal</button>
-</div></div>
-
+<div class="tabs"><button id="tabData" class="active" onclick="switchTab('data')">DATA</button><button id="tabPohon" onclick="switchTab('pohon')">POHON</button></div>
+<input id="cari" placeholder="Cari nama..." oninput="render()" style="width:100%;border:1.5px solid #000;padding:10px;margin-top:10px">
+<div style="display:flex;gap:8px;margin-top:10px"><input id="namaBaru" placeholder="Nama Baru" style="flex:1;border:1.5px solid #000;padding:10px"><button onclick="tambah()" style="background:#000;color:#fff;padding:10px">+ Tambah</button></div>
+<div id="list" style="margin-top:16px;border-top:2px solid #000"></div>
+<pre id="pohonView" style="display:none;border:1.5px solid #000;padding:12px;min-height:300px;margin-top:12px"></pre>
 <script>
-const SB_URL="https://aftvoyxwsmdcedvxehuh.supabase.co";
-const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmdHZveXh3c21kY2VkdnhlaHVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxMjQ4NzcsImV4cCI6MjEwNTcwMDg3N30.QERB57Nn6mTbUSKWwzVI_a6BVjxt9s77hV_IJFsHstM";
-const isView=new URLSearchParams(location.search).get('view')==='1';
-let client=supabase.createClient(SB_URL,SB_KEY),data=[],editId=null,tempFoto=null;
-
-function showPage(n){if(isView)n=2;document.getElementById('page1').classList.toggle('show',n==1);document.getElementById('page2').classList.toggle('show',n==2);document.getElementById('t1').classList.toggle('active',n==1);document.getElementById('t2').classList.toggle('active',n==2);if(n==2)render();}
-function tglIndo(d){if(!d)return'';try{let t=new Date(d);return t.getDate()+'/'+(t.getMonth()+1)+'/'+t.getFullYear();}catch{return d}}
-function previewFoto(inp){let f=inp.files[0];if(!f)return;if(f.size>800000){alert('Foto kebesaran Pak, max 800KB Pak!');return;}let r=new FileReader();r.onload=e=>{tempFoto=e.target.result;let im=document.getElementById('prevFoto');im.src=tempFoto;im.style.display='block';};r.readAsDataURL(f);}
-async function init(){let {data:rows,error}=await client.from('anggota').select('*').order('created_at');if(error){alert('Error: '+error.message);return;}data=rows||[];document.getElementById('shareLink').value=location.origin+location.pathname+"?view=1";document.getElementById('infoHitung').innerText=data.length+" Anggota • "+new Date().toLocaleDateString('id-ID');if(isView){document.getElementById('header').style.display='none';document.getElementById('page1').style.display='none';document.getElementById('page2').classList.add('show');}render();}
-function render(){
-let q=(document.getElementById('q').value||'').toLowerCase(),f=data.filter(d=>(d.nama||'').toLowerCase().includes(q));
-if(!isView){document.getElementById('list').innerHTML=f.map(d=>`<div class="item" onclick="bukaEdit(${d.id})"><div style="display:flex;align-items:center"><img src="${d.foto_url||'https://ui-avatars.com/api/?name='+encodeURIComponent(d.nama)+'&background=fff&color=000&size=36'}" ><div><b>${d.nama}</b> ${d.tgl_lahir?`<small style="color:#666">(${tglIndo(d.tgl_lahir)})</small>`:''}<br><small>${d.pasangan?' + '+d.pasangan:''}</small></div></div><div>></div></div>`).join('')||'<small style="color:#888">Kosong Pak</small>';}
-let names=new Set(data.map(r=>r.nama.trim())),roots=data.filter(r=>(!r.ayah||!names.has(r.ayah.trim()))&&(!r.ibu||!names.has(r.ibu.trim()))),byParent={};
-data.forEach(r=>{if(r.ayah){byParent[r.ayah.trim()]=byParent[r.ayah.trim()]||[];byParent[r.ayah.trim()].push(r);}if(r.ibu){byParent[r.ibu.trim()]=byParent[r.ibu.trim()]||[];if(!byParent[r.ibu.trim()].find(x=>x.id==r.id))byParent[r.ibu.trim()].push(r);}});
-function rn(p,d){if(d>16)return'';let ch=[...new Map((byParent[p.nama.trim()]||[]).map(x=>[x.id,x])).values())];let img=p.foto_url?`<img src="${p.foto_url}">`:'';let tgl=p.tgl_lahir?`<small style="font-size:10px;color:#555">${tglIndo(p.tgl_lahir)}</small>`:'';return `<div class="node"><div class="line"></div><span class="box">${img}<span>${p.nama} ${p.pasangan?' + '+p.pasangan:''} ${tgl}</span></span><div>${ch.map(c=>rn(c,d+1)).join('')}</div></div>`}
-document.getElementById('pohon').innerHTML=roots.map(r=>`<div class="family">${rn(r,0)}</div>`).join('')||'Belum ada data Pak';
-}
-async function tambah(){let n=document.getElementById('nama').value.trim();if(!n)return;await client.from('anggota').insert([{nama:n}]);document.getElementById('nama').value='';init();}
-function bukaEdit(id){if(isView)return;let d=data.find(x=>x.id==id);editId=id;tempFoto=d.foto_url||null;document.getElementById('e_nama').value=d.nama;document.getElementById('e_ayah').value=d.ayah||'';document.getElementById('e_ibu').value=d.ibu||'';document.getElementById('e_pasangan').value=d.pasangan||'';document.getElementById('e_tgl').value=d.tgl_lahir||'';let im=document.getElementById('prevFoto');if(d.foto_url){im.src=d.foto_url;im.style.display='block';}else im.style.display='none';document.getElementById('e_fotoFile').value='';document.getElementById('modal').classList.add('show');}
-function tutup(){document.getElementById('modal').classList.remove('show');tempFoto=null;}
-async function simpanEdit(){let p={nama:document.getElementById('e_nama').value.trim(),ayah:document.getElementById('e_ayah').value.trim()||null,ibu:document.getElementById('e_ibu').value.trim()||null,pasangan:document.getElementById('e_pasangan').value.trim()||null,tgl_lahir:document.getElementById('e_tgl').value||null};if(tempFoto)p.foto_url=tempFoto;let {error}=await client.from('anggota').update(p).eq('id',editId);if(error)alert(error.message);tutup();init();}
-async function hapusData(){if(!confirm('Hapus data ini Pak?'))return;await client.from('anggota').delete().eq('id',editId);tutup();init();}
-function copyLink(){let i=document.getElementById('shareLink');i.select();document.execCommand('copy');alert('Link lihat disalin Pak!');}
-init();
+const SUPABASE_URL = "https://aftvoyxwsmdcedvxehuh.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmdHZveXh3c21kY2VkdnhlaHVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxMjQ4NzcsImV4cCI6MjEwNTcwMDg3N30.QERB57Nn6mTbUSKWwzVI_a6BVjxt9s77hV_IJFsHstM";
+let supa = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let data=[];
+async function load(){try{let {data:d}=await supa.from("anggota").select("*").order("id");data=d||[];}catch(e){let l=localStorage.getItem("silsilah_data");if(l)data=JSON.parse(l);}render();}
+function render(){let q=(document.getElementById("cari").value||"").toLowerCase();let list=document.getElementById("list");list.innerHTML="";let f=data.filter(x=>(x.nama||"").toLowerCase().includes(q));f.forEach((row,i)=>{let idx=data.indexOf(row);let div=document.createElement("div");div.style="display:flex;justify-content:space-between;padding:10px;border-bottom:1px solid #000";div.innerHTML=`<b>${row.nama}</b><span><button onclick="edit(${idx})">Edit</button> <button onclick="hapus(${idx})">Hapus</button></span>`;list.appendChild(div);});document.getElementById("pohonView").textContent=data.map(r=>`${r.nama} ${r.ayah?`(ayah:${r.ayah})`:""}`).join("\n");}
+async function tambah(){let inp=document.getElementById("namaBaru");let nama=inp.value.trim();if(!nama)return;let {data:d}=await supa.from("anggota").insert([{nama}]).select();if(d&&d[0])data.push(d[0]);else data.push({nama});inp.value="";render();}
+async function hapus(idx){if(!confirm("Hapus?"))return;let row=data[idx];if(row.id)await supa.from("anggota").delete().eq("id",row.id);data.splice(idx,1);render();}
+async function edit(idx){let r=data[idx];let nama=prompt("Nama:",r.nama);if(nama===null)return;let ayah=prompt("Ayah:",r.ayah||"");let ibu=prompt("Ibu:",r.ibu||"");if(row.id)await supa.from("anggota").update({nama,ayah,ibu}).eq("id",r.id);data[idx]={...r,nama,ayah,ibu};render();}
+function switchTab(t){document.getElementById("tabData").classList.toggle("active",t==="data");document.getElementById("tabPohon").classList.toggle("active",t==="pohon");document.getElementById("list").style.display=t==="data"?"block":"none";document.getElementById("pohonView").style.display=t==="pohon"?"block":"none";}
+load();
 </script></body></html>
