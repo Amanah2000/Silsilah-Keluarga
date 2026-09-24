@@ -123,7 +123,6 @@ async function tambah(){
  document.getElementById("namaBaru").value=""; render(); renderPohon();
 }
 async function hapus(idx){ if(!confirm("Hapus?"))return; let r=data[idx]; if(r.id) await supa.from("anggota").delete().eq("id",r.id); data.splice(idx,1); render(); renderPohon(); }
-
 function buildTree(){
  let map={}; data.forEach(d=>{ map[d.nama]= {...d, children:[]}; });
  data.forEach(d=>{ if(d.ayah &&!map[d.ayah]) map[d.ayah]={nama:d.ayah, children:[], placeholder:true}; });
