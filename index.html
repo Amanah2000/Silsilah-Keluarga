@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Silsilah TAU</title>
+<title>Silsilah TAU - Foto Pasangan</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{font-family:Consolas,monospace;box-sizing:border-box}
@@ -11,8 +11,8 @@ body{margin:0;border:2px solid #000}
 .tabs button.active{background:#000;color:#fff}
 .row{display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid #000}
 .row img{width:48px;height:48px;border:1.5px solid #000;object-fit:cover}
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);align-items:center;justify-content:center}
-.modal-box{background:#fff;border:2px solid #000;padding:16px;width:92%;max-width:380px}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);align-items:center;justify-content:center;overflow:auto;padding:10px}
+.modal-box{background:#fff;border:2px solid #000;padding:16px;width:92%;max-width:420px;max-height:90vh;overflow:auto}
 .modal-box input{width:100%;border:1.5px solid #000;padding:10px;margin:6px 0}
 .preview{width:90px;height:90px;border:1.5px dashed #000;object-fit:cover;display:block;margin:8px 0}
 </style>
@@ -36,28 +36,40 @@ body{margin:0;border:2px solid #000}
 
 <div id="pohonWrap" style="display:none;padding:12px;overflow:auto"><div id="pohonView"></div></div>
 
-<!-- MODAL EDIT -->
 <div id="modal" class="modal" onclick="if(event.target==this)closeModal()">
 <div class="modal-box">
 <h3 style="margin:0 0 10px">Edit Anggota</h3>
 <input id="e_nama" placeholder="Nama Lengkap">
 <input id="e_ayah" placeholder="Nama Ayah (ketik persis)">
 <input id="e_ibu" placeholder="Nama Ibu">
-<label style="font-size:12px;font-weight:bold">PASANGAN Pak (suami/istri):</label>
-<input id="e_pasangan" placeholder="Nama Pasangan Pak">
-<label style="font-size:12px;font-weight:bold">TGL LAHIR Pak (klik kalender Pak):</label>
+
+<hr style="margin:12px 0">
+<label style="font-size:12px;font-weight:bold;background:#ffe;padding:2px 6px">PASANGAN (Suami/Istri)</label>
+<input id="e_pasangan" placeholder="Nama Pasangan">
+<label style="font-size:12px;font-weight:bold">TGL LAHIR Pasangan:</label>
+<input id="e_tgl_pasangan" type="date">
+<label style="font-size:12px;font-weight:bold">FOTO Pasangan:</label>
+<input id="e_file_pasangan" type="file" accept="image/*" onchange="previewFotoPasangan(this)">
+<img id="e_preview_pasangan" class="preview" src="" style="display:none">
+<input id="e_foto_pasangan_url" type="hidden">
+<button type="button" onclick="hapusFotoPasanganPak()" style="width:100%;background:#ffcccc;border:1.5px solid #000;padding:8px;font-weight:bold">🗑️ HAPUS FOTO PASANGAN</button>
+
+<hr style="margin:12px 0">
+<label style="font-size:12px;font-weight:bold">TGL LAHIR Sendiri:</label>
 <input id="e_tgl" type="date">
-<label style="font-size:12px;font-weight:bold">FOTO Pak (pilih dari HP Pak):</label>
+<label style="font-size:12px;font-weight:bold">FOTO Sendiri:</label>
 <input id="e_file" type="file" accept="image/*" onchange="previewFoto(this)">
 <img id="e_preview" class="preview" src="" style="display:none">
+<button type="button" onclick="hapusFotoPak()" style="width:100%;margin-top:8px;background:#ffcccc;border:1.5px solid #000;padding:8px;font-weight:bold">🗑️ HAPUS FOTO SENDIRI</button>
 <input id="e_foto_url" type="hidden">
+
 <div style="display:flex;gap:8px;margin-top:12px">
 <button onclick="simpanEdit()" style="flex:1;background:#000;color:#fff;padding:12px;border:none;font-weight:bold">SIMPAN</button>
 <button onclick="closeModal()" style="flex:1;background:#fff;border:1.5px solid #000;padding:12px">Batal</button>
 </div>
 </div>
 </div>
- <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
 <script>
 const SUPABASE_URL="https://aftvoyxwsmdcedvxehuh.supabase.co";
 const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmdHZveXh3c21kY2VkdnhlaHVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxMjQ4NzcsImV4cCI6MjEwNTcwMDg3N30.QERB57Nn6mTbUSKWwzVI_a6BVjxt9s77hV_IJFsHstM";
@@ -72,10 +84,12 @@ function render(){
   let list=document.getElementById("list"); list.innerHTML="";
   data.filter(x=>(x.nama||"").toLowerCase().includes(q)).forEach(r=>{
     let idx=data.indexOf(r);
-    let img=r.foto_url?`<img src="${r.foto_url}" style="width:48px;height:48px;border:1.5px solid #000;display:flex;align-items:center">`:`<div style="width:48px;height:48px;border:1.5px solid #000;display:flex;align-items:center"></div>`;
-    let tgl=r.tgl_lahir?`<div style="font-size:11px;opacity:.7">${r.tgl_lahir}</div>`:"";
+    let img=r.foto_url?`<img src="${r.foto_url}">`:`<div style="width:48px;height:48px;border:1.5px solid #000"></div>`;
+    let img2=r.foto_pasangan_url?`<img src="${r.foto_pasangan_url}" style="width:32px;height:32px;border:1.5px solid #000;object-fit:cover;margin-left:4px">`:"";
+    let tgl=r.tgl_lahir?`<div style="font-size:11px;opacity:.7">🎂 ${r.tgl_lahir}</div>`:"";
+    let tglP=r.tgl_lahir_pasangan?`<div style="font-size:11px;color:#b00">🎂 pasangan: ${r.tgl_lahir_pasangan}</div>`:"";
     let div=document.createElement("div"); div.className="row";
-    div.innerHTML=`${img}<div style="flex:1"><b>${r.nama}</b>${tgl}<div style="font-size:11px">ayah:${r.ayah||"-"}<br>ibu:${r.ibu||"-"}<br>💑 pasangan:${r.pasangan||"-"}</div></div><button onclick="openEdit(${idx})">Edit</button></div>`;
+    div.innerHTML=`${img}${img2}<div style="flex:1"><b>${r.nama}</b>${tgl}<div style="font-size:11px">ayah:${r.ayah||"-"} | ibu:${r.ibu||"-"}<br>💑 ${r.pasangan||"-"} ${tglP}</div></div><button onclick="openEdit(${idx})">Edit</button>`;
     list.appendChild(div);
   });
 }
@@ -85,20 +99,44 @@ function previewFoto(inp){
  reader.onload=e=>{
   document.getElementById("e_preview").src=e.target.result;
   document.getElementById("e_preview").style.display="block";
-  document.getElementById("e_foto_url").value=e.target.result; // simpan base64 Pak, nggak perlu link Pak!
+  document.getElementById("e_foto_url").value=e.target.result;
  };
  reader.readAsDataURL(file);
+}
+function previewFotoPasangan(inp){
+ let file=inp.files[0]; if(!file)return;
+ let reader=new FileReader();
+ reader.onload=e=>{
+  document.getElementById("e_preview_pasangan").src=e.target.result;
+  document.getElementById("e_preview_pasangan").style.display="block";
+  document.getElementById("e_foto_pasangan_url").value=e.target.result;
+ };
+ reader.readAsDataURL(file);
+}
+function hapusFotoPak(){
+ document.getElementById("e_foto_url").value="";
+ document.getElementById("e_preview").style.display="none";
+ document.getElementById("e_file").value="";
+}
+function hapusFotoPasanganPak(){
+ document.getElementById("e_foto_pasangan_url").value="";
+ document.getElementById("e_preview_pasangan").style.display="none";
+ document.getElementById("e_file_pasangan").value="";
 }
 function openEdit(idx){
   editIdx=idx; let r=data[idx];
   document.getElementById("e_nama").value=r.nama||"";
   document.getElementById("e_ayah").value=r.ayah||"";
   document.getElementById("e_ibu").value=r.ibu||"";
-  document.getElementById("e_pasangan").value=r.pasangan||""; // <-- TAMBAHIN INI PAK BARIS 97 PAK!
+  document.getElementById("e_pasangan").value=r.pasangan||"";
   document.getElementById("e_tgl").value=r.tgl_lahir||"";
+  document.getElementById("e_tgl_pasangan").value=r.tgl_lahir_pasangan||"";
   document.getElementById("e_foto_url").value=r.foto_url||"";
+  document.getElementById("e_foto_pasangan_url").value=r.foto_pasangan_url||"";
  let prev=document.getElementById("e_preview");
  if(r.foto_url){ prev.src=r.foto_url; prev.style.display="block"; } else prev.style.display="none";
+ let prev2=document.getElementById("e_preview_pasangan");
+ if(r.foto_pasangan_url){ prev2.src=r.foto_pasangan_url; prev2.style.display="block"; } else prev2.style.display="none";
  document.getElementById("modal").style.display="flex";
 }
 function closeModal(){ document.getElementById("modal").style.display="none"; }
@@ -108,9 +146,11 @@ async function simpanEdit(){
   nama:document.getElementById("e_nama").value.trim(),
   ayah:document.getElementById("e_ayah").value.trim(),
   ibu:document.getElementById("e_ibu").value.trim(),
-  pasangan: document.getElementById('e_pasangan').value.trim(),
+  pasangan: document.getElementById('e_pasangan').value.trim() || null,
   tgl_lahir:document.getElementById("e_tgl").value||null,
-  foto_url:document.getElementById("e_foto_url").value||null
+  tgl_lahir_pasangan:document.getElementById("e_tgl_pasangan").value||null,
+  foto_url:document.getElementById("e_foto_url").value||null,
+  foto_pasangan_url:document.getElementById("e_foto_pasangan_url").value||null
  };
  if(r.id) await supa.from("anggota").update(baru).eq("id",r.id);
  data[editIdx]={...r,...baru};
@@ -122,7 +162,6 @@ async function tambah(){
  if(d&&d[0]) data.push(d[0]); else data.push({nama});
  document.getElementById("namaBaru").value=""; render(); renderPohon();
 }
-async function hapus(idx){ if(!confirm("Hapus?"))return; let r=data[idx]; if(r.id) await supa.from("anggota").delete().eq("id",r.id); data.splice(idx,1); render(); renderPohon(); }
 function buildTree(){
  let map={}; data.forEach(d=>{ map[d.nama]= {...d, children:[]}; });
  data.forEach(d=>{ if(d.ayah &&!map[d.ayah]) map[d.ayah]={nama:d.ayah, children:[], placeholder:true}; });
@@ -130,14 +169,17 @@ function buildTree(){
  return Object.values(map).filter(n=>!n.ayah ||!map[n.ayah]);
 }
 function nodeHTML(node,isRoot){
-  let foto=node.foto_url?`<img src="${node.foto_url}" style="width:40px;height:40px;border:1.5px solid #000;object-fit:cover;display:block;margin:0 auto 4px">`:"";
-  let tgl=node.tgl_lahir?`<div style="font-size:9px;opacity:.6">${node.tgl_lahir}</div>`:"";
-  let ps=node.pasangan?`<div style="font-size:9px;color:#b00">💑 ${node.pasangan}</div>`:"";
-  let childs=node.children&&node.children.length?`<div style="display:flex;gap:12px;margin-top:20px">${node.children.map(c=>`<div>${nodeHTML(c,false)}</div>`).join("")}</div>`:"";
-  return `<div style="display:flex;flex-direction:column;align-items:center"><div style="border:2px solid #000;padding:6px 10px;background:${isRoot?'#ffe': '#fff'};text-align:center;min-width:80px">${foto}<b style="font-size:11px">${node.nama}</b>${tgl}${ps}</div>${childs}</div>`;
+  let foto1=node.foto_url?`<img src="${node.foto_url}" style="width:50px;height:50px;border:1.5px solid #000;object-fit:cover">`:`<div style="width:50px;height:50px;border:1.5px dashed #aaa;display:flex;align-items:center;justify-content:center;font-size:9px">NO FOTO</div>`;
+  let foto2=node.foto_pasangan_url?`<img src="${node.foto_pasangan_url}" style="width:50px;height:50px;border:1.5px solid #b00;object-fit:cover">`:`<div style="width:50px;height:50px;border:1.5px dashed #f99;display:flex;align-items:center;justify-content:center;font-size:9px">NO FOTO</div>`;
+  let tgl1=node.tgl_lahir?`<div style="font-size:9px">${node.tgl_lahir}</div>`:`<div style="font-size:9px;opacity:.5">-</div>`;
+  let tgl2=node.tgl_lahir_pasangan?`<div style="font-size:9px;color:#b00">${node.tgl_lahir_pasangan}</div>`:`<div style="font-size:9px;opacity:.5">-</div>`;
+  let nama1=`<b style="font-size:10px">${node.nama}</b>`;
+  let nama2=node.pasangan?`<b style="font-size:10px;color:#b00">${node.pasangan}</b>`:"";
+  let childs=node.children&&node.children.length?`<div style="display:flex;gap:12px;margin-top:20px;justify-content:center">${node.children.map(c=>`<div>${nodeHTML(c,false)}</div>`).join("")}</div>`:"";
+  return `<div style="display:flex;flex-direction:column;align-items:center"><div style="border:2px solid #000;padding:8px;background:${isRoot?'#ffe':'#fff'};text-align:center;min-width:180px"><div style="display:flex;gap:12px;justify-content:center"><div style="text-align:center">${foto1}${nama1}${tgl1}</div>${node.pasangan?`<div style="text-align:center">${foto2}${nama2}${tgl2}</div>`:""}</div></div>${childs}</div>`;
 }
 function renderPohon(){
- let roots=buildTree(); let wahyudi=roots.find(r=>r.nama.toLowerCase().includes("wahyudi")); if(wahyudi) roots=[wahyudi];
+ let roots=buildTree(); 
  document.getElementById("pohonView").innerHTML=roots.map(r=>nodeHTML(r,true)).join("<br><br>");
 }
 function switchTab(t){
@@ -151,4 +193,3 @@ load();
 </script>
 </body>
 </html>
-
