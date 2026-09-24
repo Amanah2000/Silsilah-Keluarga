@@ -79,17 +79,19 @@ async function load(){
  let {data:d}=await supa.from("anggota").select("*").order("id");
  data=d||[]; render(); renderPohon();
 }
+<script>
+// GANTI PAK FUNGSI render() PAK JADI INI PAK
 function render(){
   let q=(document.getElementById("cari").value||"").toLowerCase();
   let list=document.getElementById("list"); list.innerHTML="";
   data.filter(x=>(x.nama||"").toLowerCase().includes(q)).forEach(r=>{
     let idx=data.indexOf(r);
-    let img=r.foto_url?`<img src="${r.foto_url}">`:`<div style="width:48px;height:48px;border:1.5px solid #000"></div>`;
-    let img2=r.foto_pasangan_url?`<img src="${r.foto_pasangan_url}" style="width:32px;height:32px;border:1.5px solid #000;object-fit:cover;margin-left:4px">`:"";
-    let tgl=r.tgl_lahir?`<div style="font-size:11px;opacity:.7">🎂 ${r.tgl_lahir}</div>`:"";
-    let tglP=r.tgl_lahir_pasangan?`<div style="font-size:11px;color:#b00">🎂 pasangan: ${r.tgl_lahir_pasangan}</div>`:"";
+    let img=r.foto_url?`<img src="${r.foto_url}" style="width:48px;height:48px;border:1.5px solid #000;object-fit:cover">`:`<div style="width:48px;height:48px;border:1.5px solid #000;background:#eee"></div>`;
+    let img2=r.foto_pasangan_url?`<img src="${r.foto_pasangan_url}" style="width:48px;height:48px;border:1.5px solid #b00;object-fit:cover">`:`<div style="width:48px;height:48px;border:1.5px dashed #f99;background:#fff;display:flex;align-items:center;justify-content:center;font-size:8px">NO</div>`;
+    let tgl=r.tgl_lahir?`🎂 ${r.tgl_lahir}`:"";
+    let tglP=r.tgl_lahir_pasangan?`🎂 ${r.tgl_lahir_pasangan}`:"";
     let div=document.createElement("div"); div.className="row";
-    div.innerHTML=`${img}${img2}<div style="flex:1"><b>${r.nama}</b>${tgl}<div style="font-size:11px">ayah:${r.ayah||"-"} | ibu:${r.ibu||"-"}<br>💑 ${r.pasangan||"-"} ${tglP}</div></div><button onclick="openEdit(${idx})">Edit</button>`;
+    div.innerHTML=`${img}${img2}<div style="flex:1"><b>${r.nama}</b><div style="font-size:11px">${tgl}</div><div style="font-size:11px">ayah:${r.ayah||"-"} | ibu:${r.ibu||"-"}</div><div style="font-size:11px">💑 ${r.pasangan||"-"} <b style="color:#b00">${tglP}</b></div></div><button onclick="openEdit(${idx})">Edit</button>`;
     list.appendChild(div);
   });
 }
