@@ -133,7 +133,7 @@ function nodeHTML(node,isRoot){
  return `<div style="display:flex;flex-direction:column;align-items:center"><div style="border:2px solid #000;padding:6px 10px;background:${isRoot?'#000':'#fff'};color:${isRoot?'#fff':'#000'};text-align:center;min-width:90px;font-size:11px;font-weight:bold">${foto}${node.nama}${tgl}</div>${childs}</div>`;
 }
 function renderPohon(){
- let roots=buildTree(); let fuad=roots.find(r=>r.nama.toLowerCase().includes("fuad")); if(fuad) roots=[fuad];
+ let roots=buildTree(); let wahyudi=roots.find(r=>r.nama.toLowerCase().includes("wahyudi")); if(wahyudi) roots=[wahyudi];
  document.getElementById("pohonView").innerHTML=roots.map(r=>nodeHTML(r,true)).join("<br><br>");
 }
 function switchTab(t){
