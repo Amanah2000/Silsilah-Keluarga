@@ -1,55 +1,74 @@
 <!DOCTYPE html>
 <html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Silsilah V7 Polosan</title>
+<title>Silsilah V8 - 2 Halaman</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-*{box-sizing:border-box;font-family:monospace}body{background:#fff;margin:0;padding:12px}
-.card{max-width:600px;margin:auto;border:1px solid #000;padding:12px}
-input{width:100%;padding:10px;border:1px solid #000;margin:4px 0;background:#fff}
-.btn{padding:10px 14px;border:1px solid #000;background:#fff;font-weight:700;cursor:pointer}
-.btn-green{background:#000;color:#fff}
+*{box-sizing:border-box;font-family:monospace}body{margin:0;background:#fff}
+.header{display:flex;border-bottom:2px solid #000;position:sticky;top:0;background:#fff;z-index:10}
+.tab{flex:1;padding:14px;text-align:center;font-weight:700;cursor:pointer;border:none;background:#fff}
+.tab.active{background:#000;color:#fff}
+.page{display:none;padding:12px;max-width:700px;margin:auto}.page.show{display:block}
+input,select{width:100%;padding:11px;border:1px solid #000;margin:4px 0}
+.btn{padding:11px 14px;border:1px solid #000;background:#fff;font-weight:700;cursor:pointer}
+.btn-black{background:#000;color:#fff;width:100%}
 .item{border:1px solid #000;padding:8px 10px;margin:6px 0;display:flex;justify-content:space-between;cursor:pointer}
-.small{font-size:11px;color:#555}
-.tree{margin-top:12px;font-size:14px}
-.node{margin-left:16px;border-left:1px solid #000;padding-left:12px;position:relative;margin-top:8px}
-.box{display:inline-block;border:1px solid #000;padding:4px 8px;background:#fff}
-.line{position:absolute;left:-1px;top:10px;width:12px;height:1px;background:#000}
+.box{display:inline-block;border:1px solid #000;padding:5px 9px;background:#fff;margin:2px 0}
+.node{margin-left:18px;border-left:1px solid #000;padding-left:14px;margin-top:10px;position:relative}
+.line{position:absolute;left:-1px;top:12px;width:14px;height:1px;background:#000}
 .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:99;align-items:center;justify-content:center;padding:16px}
-.modal.show{display:flex}.modal-box{background:#fff;border:1px solid #000;padding:14px;width:100%;max-width:380px}
+.modal.show{display:flex}.modal-box{background:#fff;border:1px solid #000;padding:14px;width:100%;max-width:400px}
+.small{font-size:11px;color:#555}
 </style>
-</head><body><div class="card">
-<b>SILSILAH - V7 POLOSAN</b><br><br>
-<input id="q" placeholder="Cari nama..." oninput="render()">
-<div style="display:flex;gap:6px"><input id="nama" placeholder="Nama Baru"><button onclick="tambah()" class="btn btn-green">+ Tambah</button></div>
-<div id="list"></div>
-<div style="margin-top:14px;border-top:1px solid #000;padding-top:8px"><b>POHON KELUARGA</b><div id="pohon" class="tree"></div></div>
+</head><body>
+
+<div class="header">
+<button id="t1" class="tab active" onclick="showPage(1)">📝 DATA</button>
+<button id="t2" class="tab" onclick="showPage(2)">🌳 POHON</button>
 </div>
 
+<!-- HALAMAN 1 : INPUT DATA - POLOSAN -->
+<div id="page1" class="page show">
+<input id="q" placeholder="Cari nama..." oninput="render()">
+<div style="display:flex;gap:6px"><input id="nama" placeholder="Nama Baru"><button onclick="tambah()" class="btn btn-black" style="width:110px;margin:4px 0">+ Tambah</button></div>
+<div id="list"></div>
+<div style="margin-top:20px;text-align:center"><button class="btn" onclick="showPage(2)">Lihat Pohon Keluarga →</button></div>
+</div>
+
+<!-- HALAMAN 2 : POHON SAJA - BERSIH -->
+<div id="page2" class="page">
+<b>POHON KELUARGA - 3 GENERASI</b>
+<div style="margin:8px 0"><input id="q2" placeholder="Cari di pohon..." oninput="render()"></div>
+<div id="pohon" style="overflow:auto;border:1px solid #000;padding:12px;min-height:300px"></div>
+<br><button class="btn" onclick="showPage(1)">← Kembali ke Data</button>
+<button class="btn" onclick="window.print()">🖨️ Cetak / Simpan PDF</button>
+</div>
+
+<!-- MODAL EDIT -->
 <div id="modal" class="modal" onclick="if(event.target==this) tutup()"><div class="modal-box">
-<b>EDIT DATA</b><br><br>
-<input id="e_nama" placeholder="Nama"><input id="e_ayah" placeholder="Ayah"><input id="e_ibu" placeholder="Ibu"><input id="e_pasangan" placeholder="Pasangan (isi nama)">
-<button class="btn btn-green" style="width:100%;margin-top:8px" onclick="simpanEdit()">Simpan</button>
+<b>EDIT</b><br><br>
+<input id="e_nama" placeholder="Nama"><input id="e_ayah" placeholder="Ayah"><input id="e_ibu" placeholder="Ibu"><input id="e_pasangan" placeholder="Pasangan">
+<button class="btn btn-black" style="margin-top:8px" onclick="simpanEdit()">Simpan</button>
 <button class="btn" style="width:100%;margin-top:6px" onclick="tutup()">Batal</button>
-<button class="btn" style="width:100%;margin-top:6px;border-color:red;color:red" onclick="hapusEdit()">Hapus</button>
+<button class="btn" style="width:100%;margin-top:6px;color:red;border-color:red" onclick="hapusEdit()">Hapus</button>
 </div></div>
 
 <script>
-let sbUrl="https://aftvoyxwsmdcedvxehuh.supabase.co",sbKey=localStorage.getItem('sb_key')||"",client,data=[],editId=null;
-async function init(){if(!sbKey){let k=prompt('Anon key:');if(k){localStorage.setItem('sb_key',k);sbKey=k;}}client=supabase.createClient(sbUrl,sbKey);
-let {data:rows}=await client.from('anggota').select('*').order('created_at');data=rows||[];render();}
+let sbUrl="https://aftvoyxwsmdcedvxehuh.supabase.co",sbKey=localStorage.getItem('sb_key')||"",client,data=[],editId=null,currentPage=1;
+function showPage(n){currentPage=n;document.getElementById('page1').classList.toggle('show',n==1);document.getElementById('page2').classList.toggle('show',n==2);document.getElementById('t1').classList.toggle('active',n==1);document.getElementById('t2').classList.toggle('active',n==2);if(n==2)render();}
+async function init(){if(!sbKey){let k=prompt('Anon key:');if(k){localStorage.setItem('sb_key',k);sbKey=k;}}client=supabase.createClient(sbUrl,sbKey);let{data:rows}=await client.from('anggota').select('*').order('created_at');data=rows||[];render();}
 function render(){
-let q=(document.getElementById('q').value||'').toLowerCase(),f=data.filter(d=>(d.nama||'').toLowerCase().includes(q));
+let q=document.getElementById(currentPage==1?'q':'q2').value.toLowerCase(),f=data.filter(d=>(d.nama||'').toLowerCase().includes(q)||(d.pasangan||'').toLowerCase().includes(q));
 document.getElementById('list').innerHTML=f.map(d=>`<div class="item" onclick="bukaEdit(${d.id})"><div><b>${d.nama}</b> ${d.pasangan?`+ ${d.pasangan}`:''}<div class="small">Ayah:${d.ayah||'-'} Ibu:${d.ibu||'-'}</div></div><div>></div></div>`).join('');
 let names=new Set(f.map(r=>r.nama.trim())),roots=f.filter(r=>(!r.ayah||!names.has(r.ayah.trim()))&&(!r.ibu||!names.has(r.ibu.trim()))),byParent={};
 f.forEach(r=>{if(r.ayah){byParent[r.ayah.trim()]=byParent[r.ayah.trim()]||[];byParent[r.ayah.trim()].push(r);}if(r.ibu){byParent[r.ibu.trim()]=byParent[r.ibu.trim()]||[];if(!byParent[r.ibu.trim()].find(x=>x.id==r.id))byParent[r.ibu.trim()].push(r);}});
-function rn(p,d){if(d>12)return'';let ch=[...new Map((byParent[p.nama.trim()]||[]).map(x=>[x.id,x])).values()];
+function rn(p,d){if(d>15)return'';let ch=[...new Map((byParent[p.nama.trim()]||[]).map(x=>[x.id,x])).values()];
 return `<div class="node"><div class="line"></div><span class="box">${p.nama} ${p.pasangan?`+ ${p.pasangan}`:''}</span><div>${ch.map(c=>rn(c,d+1)).join('')}</div></div>`}
-document.getElementById('pohon').innerHTML=roots.map(r=>rn(r,0)).join('')||'- kosong -';
+document.getElementById('pohon').innerHTML=roots.map(r=>rn(r,0)).join('')||'Kosong';
 }
 async function tambah(){let n=document.getElementById('nama').value.trim();if(!n)return;await client.from('anggota').insert([{nama:n}]);document.getElementById('nama').value='';init();}
 function bukaEdit(id){let d=data.find(x=>x.id==id);editId=id;document.getElementById('e_nama').value=d.nama;document.getElementById('e_ayah').value=d.ayah||'';document.getElementById('e_ibu').value=d.ibu||'';document.getElementById('e_pasangan').value=d.pasangan||'';document.getElementById('modal').classList.add('show');}
 function tutup(){document.getElementById('modal').classList.remove('show');}
-async function simpanEdit(){let payload={nama:document.getElementById('e_nama').value.trim(),ayah:document.getElementById('e_ayah').value.trim()||null,ibu:document.getElementById('e_ibu').value.trim()||null,pasangan:document.getElementById('e_pasangan').value.trim()||null};await client.from('anggota').update(payload).eq('id',editId);tutup();init();}
+async function simpanEdit(){let p={nama:document.getElementById('e_nama').value.trim(),ayah:document.getElementById('e_ayah').value.trim()||null,ibu:document.getElementById('e_ibu').value.trim()||null,pasangan:document.getElementById('e_pasangan').value.trim()||null};await client.from('anggota').update(p).eq('id',editId);tutup();init();}
 async function hapusEdit(){if(!confirm('Yakin hapus?'))return;await client.from('anggota').delete().eq('id',editId);tutup();init();}
 init();
 </script></body></html>
