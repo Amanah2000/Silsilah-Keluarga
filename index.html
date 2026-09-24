@@ -90,13 +90,13 @@ function previewFoto(inp){
  reader.readAsDataURL(file);
 }
 function openEdit(idx){
- editIdx=idx; let r=data[idx];
- document.getElementById("e_nama").value=r.nama||"";
- document.getElementById("e_ayah").value=r.ayah||"";
- document.getElementById("e_ibu").value=r.ibu||"";
- document.getElementById('e_pasangan').value
- document.getElementById("e_tgl").value=r.tgl_lahir||"";
- document.getElementById("e_foto_url").value=r.foto_url||"";
+  editIdx=idx; let r=data[idx];
+  document.getElementById("e_nama").value=r.nama||"";
+  document.getElementById("e_ayah").value=r.ayah||"";
+  document.getElementById("e_ibu").value=r.ibu||"";
+  document.getElementById("e_pasangan").value=r.pasangan||""; // <-- TAMBAHIN INI PAK BARIS 97 PAK!
+  document.getElementById("e_tgl").value=r.tgl_lahir||"";
+  document.getElementById("e_foto_url").value=r.foto_url||"";
  let prev=document.getElementById("e_preview");
  if(r.foto_url){ prev.src=r.foto_url; prev.style.display="block"; } else prev.style.display="none";
  document.getElementById("modal").style.display="flex";
@@ -108,7 +108,7 @@ async function simpanEdit(){
   nama:document.getElementById("e_nama").value.trim(),
   ayah:document.getElementById("e_ayah").value.trim(),
   ibu:document.getElementById("e_ibu").value.trim(),
-  pasangan: document.getElementById('e_pasangan').value
+  pasangan: document.getElementById('e_pasangan').value.trim(),
   tgl_lahir:document.getElementById("e_tgl").value||null,
   foto_url:document.getElementById("e_foto_url").value||null
  };
