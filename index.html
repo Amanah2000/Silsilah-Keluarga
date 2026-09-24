@@ -68,15 +68,16 @@ async function load(){
  data=d||[]; render(); renderPohon();
 }
 function render(){
- let q=(document.getElementById("cari").value||"").toLowerCase();
- let list=document.getElementById("list"); list.innerHTML="";
- data.filter(x=>(x.nama||"").toLowerCase().includes(q)).forEach(r=>{
-  let idx=data.indexOf(r);
-  let img=r.foto_url?`<img src="${r.foto_url}">`:`<div style="width:48px;height:48px;border:1.5px solid #000;display:flex;align-items:center;justify-content:center">?</div>`;
-  let tgl=r.tgl_lahir?`<div style="font-size:11px;opacity:.7">${r.tgl_lahir}</div>`:"";
-  let div=document.createElement("div"); div.className="row";
-div.innerHTML=`${img}<div style="flex:1"><b>${r.nama}</b>${tgl}<div style="font-size:11px">ayah:${r.ayah||"-"}<br>ibu:${r.ibu||"-"}<br>💑 pasangan:${r.pasangan||"-"}</div></div><button onclick="openEdit(${idx})">Edit</button></div>`;
- });
+  let q=(document.getElementById("cari").value||"").toLowerCase();
+  let list=document.getElementById("list"); list.innerHTML="";
+  data.filter(x=>(x.nama||"").toLowerCase().includes(q)).forEach(r=>{
+    let idx=data.indexOf(r);
+    let img=r.foto_url?`<img src="${r.foto_url}" style="width:48px;height:48px;border:1.5px solid #000;display:flex;align-items:center">`:`<div style="width:48px;height:48px;border:1.5px solid #000;display:flex;align-items:center"></div>`;
+    let tgl=r.tgl_lahir?`<div style="font-size:11px;opacity:.7">${r.tgl_lahir}</div>`:"";
+    let div=document.createElement("div"); div.className="row";
+    div.innerHTML=`${img}<div style="flex:1"><b>${r.nama}</b>${tgl}<div style="font-size:11px">ayah:${r.ayah||"-"}<br>ibu:${r.ibu||"-"}<br>💑 pasangan:${r.pasangan||"-"}</div></div><button onclick="openEdit(${idx})">Edit</button></div>`;
+    list.appendChild(div);
+  });
 }
 function previewFoto(inp){
  let file=inp.files[0]; if(!file)return;
