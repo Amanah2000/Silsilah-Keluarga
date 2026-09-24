@@ -87,7 +87,7 @@ function render(){
   data.filter(x=>(x.nama||"").toLowerCase().includes(q)).forEach(r=>{
     let idx=data.indexOf(r);
     let img=r.foto_url?`<img src="${r.foto_url}" style="width:48px;height:48px;border:1.5px solid #000;object-fit:cover">`:`<div style="width:48px;height:48px;border:1.5px solid #000;background:#eee"></div>`;
-    let img2=r.foto_pasangan_url?`<img src="${r.foto_pasangan_url}" style="width:48px;height:48px;border:1.5px solid #b00;object-fit:cover">`:`<div style="width:48px;height:48px;border:1.5px dashed #f99;background:#fff;display:flex;align-items:center;justify-content:center;font-size:8px">NO</div>`;
+    let img2=r.foto_pasangan_url?`<img src="${r.foto_pasangan_url}" style="width:48px;height:48px;border:1.5px solid #b00;object-fit:cover">`:`<div style="width:48px;height:48px;border:1.5px dashed #f99"></div>`;
     let tgl=r.tgl_lahir?`🎂 ${r.tgl_lahir}`:"";
     let tglP=r.tgl_lahir_pasangan?`🎂 ${r.tgl_lahir_pasangan}`:"";
     let div=document.createElement("div"); div.className="row";
