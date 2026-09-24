@@ -75,8 +75,7 @@ function render(){
   let img=r.foto_url?`<img src="${r.foto_url}">`:`<div style="width:48px;height:48px;border:1.5px solid #000;display:flex;align-items:center;justify-content:center">?</div>`;
   let tgl=r.tgl_lahir?`<div style="font-size:11px;opacity:.7">${r.tgl_lahir}</div>`:"";
   let div=document.createElement("div"); div.className="row";
-  div.innerHTML=`${img}<div style="flex:1"><b>${r.nama}</b>${tgl}<div style="font-size:11px">ayah:${r.ayah||"-"}</div></div><button onclick="openEdit(${idx})" style="border:1.5px solid #000;background:#fff;padding:6px 12px">Edit</button><button onclick="hapus(${idx})" style="border:1.5px solid #000;background:#fff;padding:6px">X</button>`;
-  list.appendChild(div);
+div.innerHTML=`${img}<div style="flex:1"><b>${r.nama}</b>${tgl}<div style="font-size:11px">ayah:${r.ayah||"-"}<br>ibu:${r.ibu||"-"}<br>💑 pasangan:${r.pasangan||"-"}</div></div><button onclick="openEdit(${idx})">Edit</button></div>`;
  });
 }
 function previewFoto(inp){
@@ -130,10 +129,11 @@ function buildTree(){
  return Object.values(map).filter(n=>!n.ayah ||!map[n.ayah]);
 }
 function nodeHTML(node,isRoot){
- let foto=node.foto_url?`<img src="${node.foto_url}" style="width:40px;height:40px;border:1.5px solid #000;object-fit:cover;display:block;margin:0 auto 4px">`:"";
- let tgl=node.tgl_lahir?`<div style="font-size:9px;opacity:.6">${node.tgl_lahir}</div>`:"";
- let childs=node.children&&node.children.length?`<div style="display:flex;gap:12px;margin-top:20px">${node.children.map(c=>`<div>${nodeHTML(c,false)}</div>`).join("")}</div>`:"";
- return `<div style="display:flex;flex-direction:column;align-items:center"><div style="border:2px solid #000;padding:6px 10px;background:${isRoot?'#000':'#fff'};color:${isRoot?'#fff':'#000'};text-align:center;min-width:90px;font-size:11px;font-weight:bold">${foto}${node.nama}${tgl}</div>${childs}</div>`;
+  let foto=node.foto_url?`<img src="${node.foto_url}" style="width:40px;height:40px;border:1.5px solid #000;object-fit:cover;display:block;margin:0 auto 4px">`:"";
+  let tgl=node.tgl_lahir?`<div style="font-size:9px;opacity:.6">${node.tgl_lahir}</div>`:"";
+  let ps=node.pasangan?`<div style="font-size:9px;color:#b00">💑 ${node.pasangan}</div>`:"";
+  let childs=node.children&&node.children.length?`<div style="display:flex;gap:12px;margin-top:20px">${node.children.map(c=>`<div>${nodeHTML(c,false)}</div>`).join("")}</div>`:"";
+  return `<div style="display:flex;flex-direction:column;align-items:center"><div style="border:2px solid #000;padding:6px 10px;background:${isRoot?'#ffe': '#fff'};text-align:center;min-width:80px">${foto}<b style="font-size:11px">${node.nama}</b>${tgl}${ps}</div>${childs}</div>`;
 }
 function renderPohon(){
  let roots=buildTree(); let wahyudi=roots.find(r=>r.nama.toLowerCase().includes("wahyudi")); if(wahyudi) roots=[wahyudi];
