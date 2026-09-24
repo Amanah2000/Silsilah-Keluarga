@@ -22,12 +22,11 @@ input{width:100%;padding:11px;border:1px solid #000;margin:4px 0}
 .modal.show{display:flex}.modal-box{background:#fff;border:1px solid #000;padding:14px;width:100%;max-width:400px}
 @media print{
 .header,.no-print{display:none !important}
-.page{display:block !important}
-@page{margin:12mm 10mm 12mm 10mm}
-#pohon{border:none !important;padding:0 !important}
-.family{border:none !important;margin-bottom:18px}
-.node{border-left:1.2px solid #000}
-.title{margin-bottom:16px}
+@page{margin:10mm}
+.print-wrap{break-inside:auto}
+.title{break-after:avoid;page-break-after:avoid;margin-bottom:0 !important;padding-bottom:10px !important}
+#pohon{break-before:avoid;page-break-before:avoid;margin-top:0 !important}
+.family:first-child{break-before:avoid !important}
 }
 </style>
 </head><body>
@@ -46,14 +45,18 @@ input{width:100%;padding:11px;border:1px solid #000;margin:4px 0}
 </div>
 
 <div id="page2" class="page">
-<div class="title" contenteditable="true">
-<b>Silsilah Keluarga Wahyudi</b><br>
-<small>3 Generasi • 11 Anggota • Dicetak 24 Sep 2026</small>
+<div class="print-wrap">
+  <div class="title" contenteditable="true">
+    <b>Silsilah Keluarga Wahyudi</b><br>
+    <small>3 Generasi • 11 Anggota • Dicetak 24 Sep 2026</small>
+  </div>
+  <div id="pohon"></div>
 </div>
-<div id="pohon"></div>
+
 <div class="no-print" style="margin-top:14px;display:flex;gap:8px">
-<button class="btn" onclick="showPage(1)">← Kembali</button>
-<button class="btn btn-black" onclick="window.print()">Cetak PDF Rapi</button>
+  <button class="btn" onclick="showPage(1)">← Kembali</button>
+  <button class="btn btn-black" onclick="window.print()">Cetak PDF Rapi</button>
+</div>
 </div>
 <div class="no-print" style="font-size:11px;margin-top:8px">
 Tips Pak: Pas cetak Pak pilih <b>Layout: Portrait</b> Pak, centang <b>Hilangkan Header/Footer</b> Pak biar link bawah nya Pak hilang Pak!
