@@ -44,12 +44,6 @@ body{margin:0;border:2px solid #000}
 <input id="e_ayah" placeholder="Nama Ayah (ketik persis)">
 <input id="e_ibu" placeholder="Nama Ibu">
 <label style="font-size:12px;font-weight:bold">TGL LAHIR Pak (klik kalender Pak):</label>
-  <label>PASANGAN Pak (suami/istri):</label>
-<input 
-  value={pasangan} 
-  onChange={e => setPasangan(e.target.value)}
-  placeholder="Nama pasangan Pak"
-/>
 <input id="e_tgl" type="date">
 <label style="font-size:12px;font-weight:bold">FOTO Pak (pilih dari HP Pak):</label>
 <input id="e_file" type="file" accept="image/*" onchange="previewFoto(this)">
