@@ -94,6 +94,7 @@ function openEdit(idx){
  document.getElementById("e_nama").value=r.nama||"";
  document.getElementById("e_ayah").value=r.ayah||"";
  document.getElementById("e_ibu").value=r.ibu||"";
+ document.getElementById('e_pasangan').value
  document.getElementById("e_tgl").value=r.tgl_lahir||"";
  document.getElementById("e_foto_url").value=r.foto_url||"";
  let prev=document.getElementById("e_preview");
@@ -107,6 +108,7 @@ async function simpanEdit(){
   nama:document.getElementById("e_nama").value.trim(),
   ayah:document.getElementById("e_ayah").value.trim(),
   ibu:document.getElementById("e_ibu").value.trim(),
+  pasangan: document.getElementById('e_pasangan').value
   tgl_lahir:document.getElementById("e_tgl").value||null,
   foto_url:document.getElementById("e_foto_url").value||null
  };
