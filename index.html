@@ -2,18 +2,19 @@
 <html>
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Silsilah TAU - Final Fix</title>
+<title>Silsilah TAU - Rapi Final</title>
 <style>
 *{font-family:Consolas,monospace;box-sizing:border-box}
-body{margin:0;border:2px solid #000}
-.tabs{display:flex}.tabs button{flex:1;padding:14px;border:1.5px solid #000;background:#fff;font-weight:bold;cursor:pointer}
+body{margin:0;border:2px solid #000;background:#fff}
+.tabs{display:flex;position:sticky;top:0;z-index:10}.tabs button{flex:1;padding:14px;border:1.5px solid #000;background:#fff;font-weight:bold;cursor:pointer}
 .tabs button.active{background:#000;color:#fff}
 .row{display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid #000}
 .row img{width:48px;height:48px;border:1.5px solid #000;object-fit:cover}
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);align-items:center;justify-content:center;overflow:auto;padding:10px}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);align-items:center;justify-content:center;overflow:auto;padding:10px;z-index:20}
 .modal-box{background:#fff;border:2px solid #000;padding:16px;width:92%;max-width:420px;max-height:90vh;overflow:auto}
 .modal-box input{width:100%;border:1.5px solid #000;padding:10px;margin:6px 0}
 .preview{width:90px;height:90px;border:1.5px dashed #000;object-fit:cover;display:block;margin:8px 0}
+.pohon-line{width:2px;background:#000;height:18px;margin:0 auto}
 </style>
 </head>
 <body>
@@ -27,11 +28,11 @@ body{margin:0;border:2px solid #000}
 </div>
 <div style="padding:8px;display:flex;gap:8px;border-bottom:2px solid #000">
 <input id="namaBaru" placeholder="Nama Baru" style="flex:1;border:1.5px solid #000;padding:10px">
-<button onclick="tambah()" style="background:#000;color:#fff;padding:10px 16px;border:none;cursor:pointer">+ Tambah</button>
+<button onclick="tambah()" style="background:#000;color:#fff;padding:10px 16px;border:none">+ Tambah</button>
 </div>
 <div id="list"></div>
 </div>
-<div id="pohonWrap" style="display:none;padding:12px;overflow:auto"><div id="pohonView"></div></div>
+<div id="pohonWrap" style="display:none;padding:12px;overflow:auto"><div id="pohonView" style="min-width:max-content"></div></div>
 <div id="modal" class="modal" onclick="if(event.target==this)closeModal()">
 <div class="modal-box">
 <h3 style="margin:0 0 10px">Edit Anggota</h3>
@@ -68,36 +69,65 @@ const SUPABASE_URL="https://aftvoyxwsmdcedvxehuh.supabase.co";
 const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmdHZveXh3c21kY2VkdnhlaHVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxMjQ4NzcsImV4cCI6MjEwNTcwMDg3N30.QERB57Nn6mTbUSKWwzVI_a6BVjxt9s77hV_IJFsHstM";
 let supa = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let data=[]; let editIdx=-1;
-async function load(){
- let {data:d} = await supa.from("anggota").select("*").order("id");
- data=d||[]; render(); renderPohon();
-}
-function render(){
-  let q=(document.getElementById("cari").value||"").toLowerCase();
-  let list=document.getElementById("list"); list.innerHTML="";
-  data.filter(x=>(x.nama||"").toLowerCase().includes(q)).forEach(r=>{
-    let idx=data.indexOf(r);
-    let img=r.foto_url?`<img src="${r.foto_url}" style="width:48px;height:48px;border:1.5px solid #000;object-fit:cover">`:`<div style="width:48px;height:48px;border:1.5px solid #000;background:#eee"></div>`;
-    let img2=r.foto_pasangan_url?`<img src="${r.foto_pasangan_url}" style="width:48px;height:48px;border:1.5px solid #b00;object-fit:cover">`:`<div style="width:48px;height:48px;border:1.5px dashed #f99"></div>`;
-    let tgl=r.tgl_lahir?`🎂 ${r.tgl_lahir}`:"";
-    let tglP=r.tgl_lahir_pasangan?`🎂 Pasangan: ${r.tgl_lahir_pasangan}`:"";
-    let div=document.createElement("div"); div.className="row";
-    div.innerHTML=`${img}${img2}<div style="flex:1"><b>${r.nama}</b><div style="font-size:11px">${tgl}</div><div style="font-size:11px">ayah:${r.ayah||"-"} | ibu:${r.ibu||"-"}</div><div style="font-size:11px">💑 ${r.pasangan||"-"} <b style="color:#b00">${tglP}</b></div></div><button onclick="openEdit(${idx})">Edit</button>`;
-    list.appendChild(div);
-  });
-}
-function previewFoto(inp){let file=inp.files[0]; if(!file)return; let reader=new FileReader(); reader.onload=e=>{document.getElementById("e_preview").src=e.target.result; document.getElementById("e_preview").style.display="block"; document.getElementById("e_foto_url").value=e.target.result;}; reader.readAsDataURL(file);}
-function previewFotoPasangan(inp){let file=inp.files[0]; if(!file)return; let reader=new FileReader(); reader.onload=e=>{document.getElementById("e_preview_pasangan").src=e.target.result; document.getElementById("e_preview_pasangan").style.display="block"; document.getElementById("e_foto_pasangan_url").value=e.target.result;}; reader.readAsDataURL(file);}
+async function load(){let {data:d}=await supa.from("anggota").select("*").order("id"); data=d||[]; render(); renderPohon();}
+function render(){let q=(document.getElementById("cari").value||"").toLowerCase(); let list=document.getElementById("list"); list.innerHTML=""; data.filter(x=>(x.nama||"").toLowerCase().includes(q)).forEach(r=>{let idx=data.indexOf(r); let img=r.foto_url?`<img src="${r.foto_url}" style="width:48px;height:48px;border:1.5px solid #000;object-fit:cover">`:`<div style="width:48px;height:48px;border:1.5px dashed #999;background:#f5f5f5;display:flex;align-items:center;justify-content:center;font-size:8px">NO</div>`; let img2=r.foto_pasangan_url?`<img src="${r.foto_pasangan_url}" style="width:48px;height:48px;border:1.5px solid #b00;object-fit:cover">`:`<div style="width:48px;height:48px;border:1.5px dashed #f99;background:#fff;display:flex;align-items:center;justify-content:center;font-size:8px">NO</div>`; let tgl=r.tgl_lahir||"-"; let tglP=r.tgl_lahir_pasangan||"-"; let div=document.createElement("div"); div.className="row"; div.innerHTML=`${img}${img2}<div style="flex:1"><b>${r.nama}</b> <span style="font-size:11px">(${tgl})</span><div style="font-size:11px">ayah:${r.ayah||"-"} | ibu:${r.ibu||"-"}</div><div style="font-size:11px">💑 ${r.pasangan||"-"} (${tglP})</div></div><button onclick="openEdit(${idx})">Edit</button>`; list.appendChild(div);});}
+function previewFoto(inp){let f=inp.files[0]; if(!f)return; let r=new FileReader(); r.onload=e=>{document.getElementById("e_preview").src=e.target.result; document.getElementById("e_preview").style.display="block"; document.getElementById("e_foto_url").value=e.target.result;}; r.readAsDataURL(f);}
+function previewFotoPasangan(inp){let f=inp.files[0]; if(!f)return; let r=new FileReader(); r.onload=e=>{document.getElementById("e_preview_pasangan").src=e.target.result; document.getElementById("e_preview_pasangan").style.display="block"; document.getElementById("e_foto_pasangan_url").value=e.target.result;}; r.readAsDataURL(f);}
 function hapusFotoPak(){document.getElementById("e_foto_url").value=""; document.getElementById("e_preview").style.display="none"; document.getElementById("e_file").value="";}
 function hapusFotoPasanganPak(){document.getElementById("e_foto_pasangan_url").value=""; document.getElementById("e_preview_pasangan").style.display="none"; document.getElementById("e_file_pasangan").value="";}
-function openEdit(idx){editIdx=idx; let r=data[idx]; document.getElementById("e_nama").value=r.nama||""; document.getElementById("e_ayah").value=r.ayah||""; document.getElementById("e_ibu").value=r.ibu||""; document.getElementById("e_pasangan").value=r.pasangan||""; document.getElementById("e_tgl").value=r.tgl_lahir||""; document.getElementById("e_tgl_pasangan").value=r.tgl_lahir_pasangan||""; document.getElementById("e_foto_url").value=r.foto_url||""; document.getElementById("e_foto_pasangan_url").value=r.foto_pasangan_url||""; let prev=document.getElementById("e_preview"); if(r.foto_url){prev.src=r.foto_url; prev.style.display="block";}else prev.style.display="none"; let prev2=document.getElementById("e_preview_pasangan"); if(r.foto_pasangan_url){prev2.src=r.foto_pasangan_url; prev2.style.display="block";}else prev2.style.display="none"; document.getElementById("modal").style.display="flex";}
+function openEdit(idx){editIdx=idx; let r=data[idx]; document.getElementById("e_nama").value=r.nama||""; document.getElementById("e_ayah").value=r.ayah||""; document.getElementById("e_ibu").value=r.ibu||""; document.getElementById("e_pasangan").value=r.pasangan||""; document.getElementById("e_tgl").value=r.tgl_lahir||""; document.getElementById("e_tgl_pasangan").value=r.tgl_lahir_pasangan||""; document.getElementById("e_foto_url").value=r.foto_url||""; document.getElementById("e_foto_pasangan_url").value=r.foto_pasangan_url||""; let p=document.getElementById("e_preview"); if(r.foto_url){p.src=r.foto_url; p.style.display="block";}else p.style.display="none"; let p2=document.getElementById("e_preview_pasangan"); if(r.foto_pasangan_url){p2.src=r.foto_pasangan_url; p2.style.display="block";}else p2.style.display="none"; document.getElementById("modal").style.display="flex";}
 function closeModal(){document.getElementById("modal").style.display="none";}
-async function simpanEdit(){let r=data[editIdx]; let baru={nama:document.getElementById("e_nama").value.trim(), ayah:document.getElementById("e_ayah").value.trim(), ibu:document.getElementById("e_ibu").value.trim(), pasangan:document.getElementById('e_pasangan').value.trim()||null, tgl_lahir:document.getElementById("e_tgl").value||null, tgl_lahir_pasangan:document.getElementById("e_tgl_pasangan").value||null, foto_url:document.getElementById("e_foto_url").value||null, foto_pasangan_url:document.getElementById("e_foto_pasangan_url").value||null}; await supa.from("anggota").update(baru).eq("id",r.id); data[editIdx]={...r,...baru}; closeModal(); render(); renderPohon();}
-async function tambah(){let nama=document.getElementById("namaBaru").value.trim(); if(!nama)return; let {data:d}=await supa.from("anggota").insert([{nama}]).select(); if(d&&d[0]) data.push(d[0]); else data.push({nama}); document.getElementById("namaBaru").value=""; render(); renderPohon();}
-function buildTree(){let map={}; data.forEach(d=>{map[d.nama]={...d, children:[]};}); data.forEach(d=>{if(d.ayah &&!map[d.ayah]) map[d.ayah]={nama:d.ayah, children:[], placeholder:true};}); Object.values(map).forEach(n=>{if(n.ayah && map[n.ayah] && n.nama!=map[n.ayah].nama) map[n.ayah].children.push(n);}); return Object.values(map).filter(n=>!n.ayah ||!map[n.ayah]);}
-function nodeHTML(node,isRoot){let foto1=node.foto_url?`<img src="${node.foto_url}" style="width:60px;height:60px;border:1.5px solid #000;object-fit:cover">`:`<div style="width:60px;height:60px;border:1.5px dashed #aaa;display:flex;align-items:center;justify-content:center;font-size:8px">NO FOTO</div>`; let foto2=node.foto_pasangan_url?`<img src="${node.foto_pasangan_url}" style="width:60px;height:60px;border:1.5px solid #b00;object-fit:cover">`:`<div style="width:60px;height:60px;border:1.5px dashed #f99;display:flex;align-items:center;justify-content:center;font-size:8px">NO FOTO</div>`; let block1=`<div style="display:flex;flex-direction:column;align-items:center;width:80px;text-align:center;gap:2px">${foto1}<b style="font-size:10px;line-height:11px;word-break:break-word">${node.nama}</b><span style="font-size:9px">${node.tgl_lahir||''}</span></div>`; let block2=node.pasangan?`<div style="display:flex;flex-direction:column;align-items:center;width:80px;text-align:center;gap:2px">${foto2}<b style="font-size:10px;line-height:11px;color:#b00;word-break:break-word">${node.pasangan}</b><span style="font-size:9px;color:#b00">${node.tgl_lahir_pasangan||''}</span></div>`:""; let childs=node.children&&node.children.length?`<div style="display:flex;gap:14px;margin-top:22px;justify-content:center">${node.children.map(c=>`<div>${nodeHTML(c,false)}</div>`).join("")}</div>`:""; return `<div style="display:flex;flex-direction:column;align-items:center"><div style="border:2px solid #000;padding:10px 12px;background:${isRoot?'#ffe':'#fff'};min-width:190px"><div style="display:flex;gap:16px;justify-content:center;align-items:flex-start">${block1}${block2}</div></div>${childs}</div>`;}
-function renderPohon(){let roots=buildTree(); document.getElementById("pohonView").innerHTML=roots.map(r=>nodeHTML(r,true)).join("<br><br>");}
-function switchTab(t){document.getElementById("bData").classList.toggle("active",t=="data"); document.getElementById("bPohon").classList.toggle("active",t=="pohon"); document.getElementById("dataWrap").style.display=t=="data"?"block":"none"; document.getElementById("pohonWrap").style.display=t=="pohon"?"block":"none"; if(t=="pohon") renderPohon();}
+async function simpanEdit(){let r=data[editIdx]; let baru={nama:document.getElementById("e_nama").value.trim(), ayah:document.getElementById("e_ayah").value.trim(), ibu:document.getElementById("e_ibu").value.trim(), pasangan:document.getElementById('e_pasangan').value.trim()||null, tgl_lahir:document.getElementById("e_tgl").value||null, tgl_lahir_pasangan:document.getElementById("e_tgl_pasangan").value||null, foto_url:document.getElementById("e_foto_url").value||null, foto_pasangan_url:document.getElementById("e_foto_pasangan_url").value||null}; let {error}=await supa.from("anggota").update(baru).eq("id",r.id); if(error){alert(error.message); return;} data[editIdx]={...r,...baru}; closeModal(); render(); renderPohon();}
+async function tambah(){let nama=document.getElementById("namaBaru").value.trim(); if(!nama)return; let {data:d}=await supa.from("anggota").insert([{nama}]).select(); if(d&&d[0]) data.push(d[0]); document.getElementById("namaBaru").value=""; render(); renderPohon();}
+function buildTreeRapi(){
+  let map={}; 
+  data.forEach(d=>{ map[d.nama.trim()] = {...d, children:[]}; });
+  data.forEach(d=>{
+    let ayah = (d.ayah||"").trim();
+    let ibu = (d.ibu||"").trim();
+    if(ayah && map[ayah]){ if(!map[ayah].children.find(c=>c.nama===d.nama)) map[ayah].children.push(map[d.nama]); }
+    else if(ibu && map[ibu]){ if(!map[ibu].children.find(c=>c.nama===d.nama)) map[ibu].children.push(map[d.nama]); }
+    if(ayah){ let owner = data.find(x=> (x.pasangan||"").trim() === ayah); if(owner && map[owner.nama]){ if(!map[owner.nama].children.find(c=>c.nama===d.nama)) map[owner.nama].children.push(map[d.nama]); } }
+  });
+  let roots = Object.values(map).filter(n=>{
+    let ayah=(n.ayah||"").trim(); let ibu=(n.ibu||"").trim();
+    let isChild = (ayah && map[ayah]) || (ibu && map[ibu]);
+    if(isChild) return false;
+    let owner = data.find(x=> (x.pasangan||"").trim() === n.nama);
+    if(owner && map[owner.nama]) return false;
+    return true;
+  });
+  roots.forEach(r=>{
+    if(r.pasangan && map[r.pasangan.trim()]){
+      let pasNode = map[r.pasangan.trim()];
+      pasNode.children.forEach(ch=>{ if(!r.children.find(c=>c.nama===ch.nama)) r.children.push(ch); });
+    }
+  });
+  return roots;
+}
+function personBlock(nama, foto_url, tgl, isPasangan){
+  let hasFoto = foto_url && foto_url.length>10;
+  let foto = hasFoto ? `<img src="${foto_url}" style="width:56px;height:56px;border:${isPasangan?'1.5px solid #b00':'1.5px solid #000'};object-fit:cover;border-radius:2px">` : `<div style="width:56px;height:56px;border:1.5px dashed ${isPasangan?'#f99':'#aaa'};background:${isPasangan?'#fff5f5':'#f9f9f9'};display:flex;align-items:center;justify-content:center;font-size:18px">${isPasangan?'👩':'👤'}</div>`;
+  let tglTxt = tgl ? `<div style="font-size:9px;opacity:.8">${tgl}</div>` : `<div style="font-size:9px;opacity:.3">-</div>`;
+  let namaStyle = isPasangan ? `color:#b00` : ``;
+  return `<div style="display:flex;flex-direction:column;align-items:center;width:84px;text-align:center;gap:3px">${foto}<b style="font-size:10px;line-height:11px;word-break:break-word;${namaStyle}">${nama||''}</b>${tglTxt}</div>`;
+}
+function nodeHTMLRapi(node){
+  let left = personBlock(node.nama, node.foto_url, node.tgl_lahir, false);
+  let right = "";
+  if(node.pasangan){
+    let fotoPas = node.foto_pasangan_url || "";
+    let tglPas = node.tgl_lahir_pasangan || "";
+    let pasAnggota = data.find(x=> x.nama.trim() === node.pasangan.trim());
+    if(pasAnggota){ if(!fotoPas) fotoPas = pasAnggota.foto_url || ""; if(!tglPas) tglPas = pasAnggota.tgl_lahir || ""; }
+    right = personBlock(node.pasangan, fotoPas, tglPas, true);
+  }
+  let hasCouple = right ? true : false;
+  let childs = node.children && node.children.length ? `<div style="margin-top:10px"><div class="pohon-line"></div><div style="display:flex;gap:12px;justify-content:center;position:relative"><div style="position:absolute;top:0;left:12%;right:12%;height:2px;background:#000"></div>${node.children.map(c=>`<div style="display:flex;flex-direction:column;align-items:center"><div style="width:2px;height:12px;background:#000"></div>${nodeHTMLRapi(c)}</div>`).join("")}</div></div>` : "";
+  return `<div style="display:flex;flex-direction:column;align-items:center"><div style="border:2px solid #000;padding:8px 10px;background:${hasCouple?'#fffef0':'#fff'};border-radius:4px;min-width:${hasCouple?'190px':'110px'}"><div style="display:flex;gap:14px;justify-content:center;align-items:flex-start">${left}${right}</div></div>${childs}</div>`;
+}
+function renderPohon(){ let roots=buildTreeRapi(); let masduki = roots.find(r=> r.nama.toLowerCase().includes("masduki")); if(masduki){ roots = [masduki, ...roots.filter(r=>r!==masduki)]; } document.getElementById("pohonView").innerHTML = roots.map(r=>`<div style="display:inline-block;vertical-align:top;margin:12px">${nodeHTMLRapi(r)}</div>`).join(""); }
+function switchTab(t){ document.getElementById("bData").classList.toggle("active",t=="data"); document.getElementById("bPohon").classList.toggle("active",t=="pohon"); document.getElementById("dataWrap").style.display=t=="data"?"block":"none"; document.getElementById("pohonWrap").style.display=t=="pohon"?"block":"none"; if(t=="pohon") renderPohon(); }
 load();
 </script>
 </body>
