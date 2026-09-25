@@ -61,11 +61,6 @@ const data = [
  {nama:'Ahmad Mujahid', tgl:'1997-12-04', ayah:'Wahyudi', ibu:'Khalimatus S'},
 ];
 
-// Urutkan anak by tanggal lahir biar posisi benar
-function getAnak(ayah, ibu){
-  return anggota.filter(a => a.ayah==ayah && a.ibu==ibu)
-  .sort((a,b) => new Date(a.tgl_lahir) - new Date(b.tgl_lahir));
-}
 </script>
 
 <style>
