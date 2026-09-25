@@ -3,6 +3,7 @@
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Silsilah - Fix Putih</title>
 <style>
+ 
 *{font-family:Consolas,monospace;box-sizing:border-box}body{margin:0}
 .tabs{display:flex;position:sticky;top:0;z-index:10;background:#fff}
 .tabs button{flex:1;padding:12px;border:1px solid #000;background:#fff;font-weight:bold}
@@ -22,6 +23,26 @@
 #fotoModal img{max-width:92%;max-height:90%;border:3px solid #fff}
 #status{padding:6px;font-size:11px;background:#ffe;border-bottom:1px solid #000}
 .row{display:flex;gap:6px;padding:6px;border-bottom:1px solid #ccc;font-size:11px;align-items:center}
+ /* Garis vertikal dari orang tua ke anak */
+.tree-line-v {
+  width: 3px;
+  height: 30px;
+  background: black;
+  margin: 0 auto;
+}
+.tree-line-h {
+  height: 3px;
+  background: black;
+  width: 100%;
+}
+.children-container {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  border-top: 3px solid black;
+  padding-top: 20px;
+  margin-top: 0;
+}
 </style>
 </head>
 <body>
