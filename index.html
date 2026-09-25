@@ -78,80 +78,51 @@ async function load(){
 function render(){
   let q=(document.getElementById("cari").value||"").toLowerCase();
   let list=document.getElementById("list"); list.innerHTML="";
-
-  // URUT TANGGAL LAHIR + PAKSA ROCHAYANIK NOMOR 3
-  let filtered = data.filter(x=>(x.nama||"").toLowerCase().includes(q));
-  let sorted = [...filtered].sort((a,b) => (a.tgl_lahir||'9999').localeCompare(b.tgl_lahir||'9999'));
-
-  let idxR = sorted.findIndex(x=>x.nama.toLowerCase().includes('rochayanik'));
-  if(idxR > -1 && idxR!= 2 && q==""){
-    let [roch] = sorted.splice(idxR,1);
-    sorted.splice(2,0,roch); // pindah ke urutan ke-3 (index 2)
+  let filtered=data.filter(x=>(x.nama||"").toLowerCase().includes(q));
+  let sorted=[...filtered].sort((a,b)=>(a.tgl_lahir||'9999').localeCompare(b.tgl_lahir||'9999'));
+  // PAKSA ROCHAYANIK URUTAN 3 DI DATA
+  if(!q){
+    let i=sorted.findIndex(x=>x.nama.toLowerCase().includes('rochayanik'));
+    if(i>2){let [r]=sorted.splice(i,1); sorted.splice(2,0,r);}
   }
-
   sorted.forEach(r=>{
     let idx=data.indexOf(r);
-    let img=r.foto_url?`<img src="${r.foto_url}" style="width:48px;height:48px;border:1.5px solid #000;object-fit:cover">`:`<div style="width:48px;height:48px;border:1.5px solid #000;background:#eee"></div>`;
-    let img2=r.foto_pasangan_url?`<img src="${r.foto_pasangan_url}" style="width:48px;height:48px;border:1.5px solid #b00;object-fit:cover">`:`<div style="width:48px;height:48px;border:1.5px dashed #f99"></div>`;
-    let tgl=r.tgl_lahir?`🎂 ${r.tgl_lahir}`:"";
-    let tglP=r.tgl_lahir_pasangan?`🎂 Pasangan: ${r.tgl_lahir_pasangan}`:"";
+    let img=r.foto_url?`<img src="${r.foto_url}" style="width:48px;height:48px;border:1.5px solid #000">`:`<div style="width:48px;height:48px;border:1.5px solid #000;background:#eee"></div>`;
+    let img2=r.foto_pasangan_url?`<img src="${r.foto_pasangan_url}" style="width:48px;height:48px;border:1.5px solid #b00">`:`<div style="width:48px;height:48px;border:1.5px dashed #f99"></div>`;
     let div=document.createElement("div"); div.className="row";
-    div.innerHTML=`${img}${img2}<div style="flex:1"><b>${r.nama}</b><div style="font-size:11px">${tgl}</div><div style="font-size:11px">ayah:${r.ayah||"-"} | ibu:${r.ibu||"-"}</div><div style="font-size:11px">💑 ${r.pasangan||"-"} <b style="color:#b00">${tglP}</b></div></div><button onclick="openEdit(${idx})">Edit</button>`;
+    div.innerHTML=`${img}${img2}<div style="flex:1"><b>${r.nama}</b><div style="font-size:11px">🎂 ${r.tgl_lahir||'-'} | ayah:${r.ayah||'-'} ibu:${r.ibu||'-'}</div><div style="font-size:11px">💑 ${r.pasangan||'-'}</div></div><button onclick="openEdit(${idx})">Edit</button>`;
     list.appendChild(div);
   });
 }
-function previewFoto(inp){let file=inp.files[0]; if(!file)return; let reader=new FileReader(); reader.onload=e=>{document.getElementById("e_preview").src=e.target.result; document.getElementById("e_preview").style.display="block"; document.getElementById("e_foto_url").value=e.target.result;}; reader.readAsDataURL(file);}
-function previewFotoPasangan(inp){let file=inp.files[0]; if(!file)return; let reader=new FileReader(); reader.onload=e=>{document.getElementById("e_preview_pasangan").src=e.target.result; document.getElementById("e_preview_pasangan").style.display="block"; document.getElementById("e_foto_pasangan_url").value=e.target.result;}; reader.readAsDataURL(file);}
-function hapusFotoPak(){document.getElementById("e_foto_url").value=""; document.getElementById("e_preview").style.display="none"; document.getElementById("e_file").value="";}
-function hapusFotoPasanganPak(){document.getElementById("e_foto_pasangan_url").value=""; document.getElementById("e_preview_pasangan").style.display="none"; document.getElementById("e_file_pasangan").value="";}
-function openEdit(idx){editIdx=idx; let r=data[idx]; document.getElementById("e_nama").value=r.nama||""; document.getElementById("e_ayah").value=r.ayah||""; document.getElementById("e_ibu").value=r.ibu||""; document.getElementById("e_pasangan").value=r.pasangan||""; document.getElementById("e_tgl").value=r.tgl_lahir||""; document.getElementById("e_tgl_pasangan").value=r.tgl_lahir_pasangan||""; document.getElementById("e_foto_url").value=r.foto_url||""; document.getElementById("e_foto_pasangan_url").value=r.foto_pasangan_url||""; let prev=document.getElementById("e_preview"); if(r.foto_url){prev.src=r.foto_url; prev.style.display="block";}else prev.style.display="none"; let prev2=document.getElementById("e_preview_pasangan"); if(r.foto_pasangan_url){prev2.src=r.foto_pasangan_url; prev2.style.display="block";}else prev2.style.display="none"; document.getElementById("modal").style.display="flex";}
-function closeModal(){document.getElementById("modal").style.display="none";}
-async function simpanEdit(){let r=data[editIdx]; let baru={nama:document.getElementById("e_nama").value.trim(), ayah:document.getElementById("e_ayah").value.trim(), ibu:document.getElementById("e_ibu").value.trim(), pasangan:document.getElementById('e_pasangan').value.trim()||null, tgl_lahir:document.getElementById("e_tgl").value||null, tgl_lahir_pasangan:document.getElementById("e_tgl_pasangan").value||null, foto_url:document.getElementById("e_foto_url").value||null, foto_pasangan_url:document.getElementById("e_foto_pasangan_url").value||null}; await supa.from("anggota").update(baru).eq("id",r.id); data[editIdx]={...r,...baru}; closeModal(); render(); renderPohon();}
-async function tambah(){let nama=document.getElementById("namaBaru").value.trim(); if(!nama)return; let {data:d}=await supa.from("anggota").insert([{nama}]).select(); if(d&&d[0]) data.push(d[0]); else data.push({nama}); document.getElementById("namaBaru").value=""; render(); renderPohon();}
+
 function buildTree(){
   let map={};
-  // bikin map dengan kunci huruf kecil biar tidak sensitif
+  data.forEach(d=>{map[d.nama.toLowerCase().trim()]={...d, children:[]}});
+  let jadiAnak=new Set();
   data.forEach(d=>{
-    let k = d.nama.toLowerCase().trim();
-    map[k]={...d, _key:k, children:[]};
-  });
-  // tambahkan juga pasangan sebagai kunci biar anak yang ibu=Nurhidayati nyambung ke Masduki
-  data.forEach(d=>{
-    if(d.pasangan){
-      let kp = d.pasangan.toLowerCase().trim();
-      if(!map[kp]) map[kp] = map[d.nama.toLowerCase().trim()];
+    let a=(d.ayah||'').toLowerCase().trim();
+    let i=(d.ibu||'').toLowerCase().trim();
+    let parent = map[a] || map[i] || null;
+    // kalau ibu = Nurhidayati, cari suaminya Masduki
+    if(!parent && i){
+      Object.values(map).forEach(p=>{
+        if(p.pasangan && p.pasangan.toLowerCase().trim()==i) parent=p;
+      });
+    }
+    if(!parent && a){
+      Object.values(map).forEach(p=>{
+        if(p.pasangan && p.pasangan.toLowerCase().trim()==a) parent=p;
+      });
+    }
+    let me=d.nama.toLowerCase().trim();
+    if(parent && parent.nama.toLowerCase().trim()!=me){
+      parent.children.push(map[me]);
+      jadiAnak.add(me);
     }
   });
-
-  let jadiAnak = new Set();
-  data.forEach(d=>{
-    let ayah = (d.ayah||"").toLowerCase().trim();
-    let ibu = (d.ibu||"").toLowerCase().trim();
-    let keyParent = null;
-    if(map[ayah]) keyParent = map[ayah]._key;
-    else if(map[ibu]) keyParent = map[ibu]._key;
-
-    if(keyParent){
-      let parent = map[keyParent];
-      let meKey = d.nama.toLowerCase().trim();
-      if(parent._key!= meKey &&!parent.children.find(c=>c.nama==d.nama)){
-        parent.children.push(map[meKey]);
-        jadiAnak.add(meKey);
-      }
-    }
-  });
-
-  let roots = Object.values(map).filter(n=>!jadiAnak.has(n._key));
-  // hapus duplikat root karena pasangan
-  let uniqueRoots = [];
-  let seen = new Set();
-  roots.forEach(r=>{ if(!seen.has(r._key)){ seen.add(r._key); uniqueRoots.push(r);} });
-
-  uniqueRoots.forEach(r=>{
-    r.children.sort((a,b)=>(a.tgl_lahir||'9999').localeCompare(b.tgl_lahir||'9999'));
-  });
-  uniqueRoots.sort((a,b)=>(a.tgl_lahir||'9999').localeCompare(b.tgl_lahir||'9999'));
-  return uniqueRoots;
+  let roots=Object.values(map).filter(n=>!jadiAnak.has(n.nama.toLowerCase().trim()));
+  roots.forEach(r=>r.children.sort((a,b)=>(a.tgl_lahir||'9999').localeCompare(b.tgl_lahir||'9999')));
+  return roots.sort((a,b)=>(a.tgl_lahir||'9999').localeCompare(b.tgl_lahir||'9999'));
 }
 
 function nodeHTML(node,isRoot){
