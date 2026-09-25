@@ -27,32 +27,15 @@
 .row{display:flex;gap:6px;padding:6px;border-bottom:1px solid #ccc;font-size:11px;align-items:center}
  /* Garis vertikal dari orang tua ke anak */
 
-</style>
-</head>
 <body>
 <div class="tabs"><button id="bData" class="active" onclick="switchTab('data')">DATA</button><button id="bPohon" onclick="switchTab('pohon')">POHON</button></div>
 <div id="dataWrap"><div id="status">Memuat...</div><div id="list"></div></div>
 <div id="pohon"></div
-<script>
-const data = [
- {nama:'Masduki', tgl:'1949-08-06', ayah:'', ibu:''},
- {nama:'Wahyudi', tgl:'1965-08-06', ayah:'Masduki', ibu:'Nurhidayati'},
- {nama:'Rochayanik', tgl:'1972-01-01', ayah:'Masduki', ibu:'Nurhidayati'},
- {nama:'Aditya SM', tgl:'1989-12-31', ayah:'Wahyudi', ibu:'Khalimatus S'},
- {nama:'Churotul Aini', tgl:'1993-05-15', ayah:'Wahyudi', ibu:'Khalimatus S'},
- {nama:'Muhammad IS', tgl:'1994-02-21', ayah:'Wahyudi', ibu:'Khalimatus S'},
- {nama:'Ahmad Mujahid', tgl:'1997-12-04', ayah:'Wahyudi', ibu:'Khalimatus S'},
-];
-
-</script>
-
-<style>
 .garis-v{width:3px;height:25px;background:black;margin:0 auto}
 .garis-h{border-top:3px solid black;display:flex;gap:12px;justify-content:center;padding-top:12px}
 .kotak{border:2px solid black;padding:6px 12px;text-align:center;background:white}
 </style>
 <div id="fotoModal" onclick="this.style.display='none'"><img id="bigFoto" src=""></div>
-
 <div style={{width:'3px', height:'25px', background:'black', margin:'0 auto'}}></div>
 <div style={{borderTop:'3px solid black', display:'flex', gap:'10px', justifyContent:'center', paddingTop:'10px'}}>
   {anak-anak.map(a => (
