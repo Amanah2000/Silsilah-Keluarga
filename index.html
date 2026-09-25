@@ -2,81 +2,81 @@
 <html>
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Silsilah Tawar - Fix</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Silsilah Tawar - FINAL RAPI</title>
 <style>
-body{font-family:Arial;background:#fff;padding:10px}
+body{font-family:Arial;background:#fff;padding:10px;overflow-x:auto}
 .judul{text-align:center;font-weight:bold;font-size:20px;margin:10px}
 .kotak{border:2px solid #000;border-radius:8px;background:#fff;
        display:flex;align-items:center;justify-content:center;
        text-align:center;box-sizing:border-box}
-.gv{width:3px;height:18px;background:#000;margin:0 auto}
+.gv{width:3px;height:20px;background:#000;margin:0 auto}
 .gh{height:3px;background:#000;margin:0 auto}
-.wrap{text-align:center}
-.l1 .kotak{width:360px;height:40px;margin:0 auto;font-weight:bold}
-.l2{display:flex;justify-content:center;gap:0}
-.l2 .col{width:50%;text-align:center}
-.l2 .kotak{width:340px;height:42px;margin:0 auto;font-size:13px}
-.l2 .gh{width:80%}
 
-.l3{display:flex;gap:10px;justify-content:center}
-.l3 .kotak{width:210px;height:44px;font-size:11px}
-.l3-col{text-align:center}
+/* UKURAN SAMA PER LEVEL */
+.b1{width:360px;height:42px;margin:0 auto;font-weight:bold}
+.b2{width:300px;height:42px;font-size:13px}
+.b3{width:210px;height:44px;font-size:11px}
+.b4{width:100px;height:44px;font-size:10px}
 
-.l4{display:flex;gap:6px;justify-content:center;border-top:3px solid #000;padding-top:8px;margin-top:0}
-.l4 .kecil{width:100px;height:42px;font-size:10px}
+.cabang{display:flex;justify-content:center;gap:80px;align-items:flex-start}
+.cabang-kiri{text-align:center}
+.cabang-kanan{text-align:center}
+
+.anak-grup{display:flex;gap:12px;justify-content:center;align-items:flex-start;margin-top:0}
+.anak-grup .col{text-align:center}
+.l4{border-top:3px solid #000;padding-top:10px;display:flex;gap:6px;justify-content:center;margin-top:0}
 </style>
 </head>
 <body>
 <div>Total: 21 data - OK</div>
 <div class="judul">Silsilah Keluarga Tawar - POHON</div>
 
-<div class="wrap l1"><div class="kotak">Masduki + Nurhidayati</div></div>
+<div class="kotak b1" style="margin:0 auto">Masduki + Nurhidayati</div>
 <div class="gv"></div>
-<div class="gh" style="width:82%"></div>
+<div class="gh" style="width:80%"></div>
 
-<div class="l2">
-  <div class="col">
-    <div class="kotak">Wahyudi + Khalimatus Sa'diyah</div>
+<div class="cabang">
+  <!-- KIRI: Wahyudi -->
+  <div class="cabang-kiri">
+    <div class="kotak b2" style="margin:0 auto">Wahyudi + Khalimatus Sa'diyah</div>
     <div class="gv"></div>
     <div class="gh" style="width:90%"></div>
-    <div class="l3" style="margin-top:0">
-      
-      <div class="l3-col">
-        <div class="kotak">Aditya Shufil Mubarok + Asfiana</div>
+    
+    <div class="anak-grup">
+      <div class="col">
+        <div class="kotak b3">Aditya Shufil Mubarok + Asfiana</div>
         <div class="gv"></div>
         <div class="gh"></div>
         <div class="l4">
-          <div class="kotak kecil">1. Azalia Nada Hibatulla</div>
-          <div class="kotak kecil">2. Ahmad Romadlon</div>
-          <div class="kotak kecil">3. Muh. Hafidz</div>
-          <div class="kotak kecil">4. Moh. Husain</div>
+          <div class="kotak b4">1. Azalia Nada Hibatulla</div>
+          <div class="kotak b4">2. Ahmad Romadlon</div>
+          <div class="kotak b4">3. Muh. Hafidz</div>
+          <div class="kotak b4">4. Moh. Husain</div>
         </div>
       </div>
-
-      <div class="l3-col">
-        <div class="kotak">Churotul Aini + Fuad Amrozi</div>
+      <div class="col">
+        <div class="kotak b3">Churotul Aini + Fuad Amrozi</div>
         <div class="gv"></div>
-        <div class="gh" style="width:70%"></div>
+        <div class="gh" style="width:60%"></div>
         <div class="l4">
-          <div class="kotak kecil">1. Umar (2010-01-01)</div>
-          <div class="kotak kecil">2. Fatimah (2010-01-02)</div>
+          <div class="kotak b4">1. Umar (2010-01-01)</div>
+          <div class="kotak b4">2. Fatimah (2010-01-02)</div>
         </div>
       </div>
-
-      <div class="l3-col"><div class="kotak">Muhammad Ja'far Shodiq + Virdayani</div></div>
-      <div class="l3-col"><div class="kotak">Ahmad Mujahid Alfataki</div></div>
-
+      <div class="col"><div class="kotak b3">Muhammad Ja'far Shodiq + Virdayani</div></div>
+      <div class="col"><div class="kotak b3">Ahmad Mujahid Alfataki</div></div>
     </div>
   </div>
 
-  <div class="col" style="width:22%">
-    <div class="kotak" style="width:210px">Rochayanik + Awet Setiawan</div>
+  <!-- KANAN: Rochayanik -->
+  <div class="cabang-kanan">
+    <div class="kotak b2" style="width:220px">Rochayanik + Awet Setiawan</div>
     <div class="gv"></div>
     <div class="gh" style="width:70%"></div>
     <div class="l4">
-      <div class="kotak kecil">1. Abidzar</div>
-      <div class="kotak kecil">2. Azar</div>
+      <div class="kotak b4">1. Abidzar</div>
+      <div class="kotak b4">2. Azar</div>
     </div>
   </div>
 </div>
