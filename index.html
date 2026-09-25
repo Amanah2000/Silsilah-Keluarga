@@ -32,11 +32,16 @@ body{margin:0;border:2px solid #000;background:#fff}
 
 </head>
 <body>
-  <div style="width:100%; overflow-x:scroll; border:1px solid #ddd">
-  <div style="min-width:1800px; padding:20px;">
-<div class="tabs">
-<button id="bData" class="active" onclick="switchTab('data')">DATA</button>
-<button id="bPohon" onclick="switchTab('pohon')">POHON</button>
+<div style="display:flex">
+  <div onclick="switchTab('data')" id="tabBtnData" style="flex:1;background:black;color:white;text-align:center;padding:12px;cursor:pointer">DATA</div>
+  <div onclick="switchTab('pohon')" id="tabBtnPohon" style="flex:1;background:white;color:black;text-align:center;padding:12px;cursor:pointer">POHON</div>
+</div>
+<div id="tab-data">
+  <input id="cari" placeholder="Cari nama...">
+  <div id="list"></div>
+</div>
+<div id="tab-pohon" style="display:none">
+  <div id="pohon"></div>
 </div>
 <div id="dataWrap">
 <div style="padding:8px;border-bottom:1.5px solid #000;display:flex;gap:8px">
@@ -143,9 +148,19 @@ function nodeHTMLRapi(node){
   return `<div style="display:flex;flex-direction:column;align-items:center"><div style="border:2px solid #000;padding:8px 10px;background:${hasCouple?'#fffef0':'#fff'};border-radius:4px;min-width:${hasCouple?'190px':'110px'}"><div style="display:flex;gap:14px;justify-content:center;align-items:flex-start">${left}${right}</div></div>${childs}</div>`;
 }
 function renderPohon(){ let roots=buildTreeRapi(); let masduki = roots.find(r=> r.nama.toLowerCase().includes("masduki")); if(masduki){ roots = [masduki, ...roots.filter(r=>r!==masduki)]; } document.getElementById("pohonView").innerHTML = roots.map(r=>`<div style="display:inline-block;vertical-align:top;margin:12px">${nodeHTMLRapi(r)}</div>`).join(""); }
-function switchTab(t){ document.getElementById("bData").classList.toggle("active",t=="data"); document.getElementById("bPohon").classList.toggle("active",t=="pohon"); document.getElementById("dataWrap").style.display=t=="data"?"block":"none"; document.getElementById("pohonWrap").style.display=t=="pohon"?"block":"none"; if(t=="pohon") renderPohon(); }
-load();
-<div id="list"></div>
+function switchTab(t){
+  document.getElementById("tab-data").style.display = t=='data' ? 'block' : 'none';
+  document.getElementById("tab-pohon").style.display = t=='pohon' ? 'block' : 'none';
+  
+  document.getElementById("tabBtnData").style.background = t=='data' ? 'black' : 'white';
+  document.getElementById("tabBtnData").style.color = t=='data' ? 'white' : 'black';
+  
+  document.getElementById("tabBtnPohon").style.background = t=='pohon' ? 'black' : 'white';
+  document.getElementById("tabBtnPohon").style.color = t=='pohon' ? 'white' : 'black';
+
+  if(t=='pohon') renderPohon();
+}
+  <div id="list"></div>
 <script>
 function buildTreeRapi(){ ... }
 function renderPohon(){ ... }
