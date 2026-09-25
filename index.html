@@ -39,24 +39,7 @@ body{font-family:Arial;background:#fff;padding:10px;overflow-x:auto}
 </style>
 </head>
 <body>
-<div id="total">Loading...</div>
-<div id="pohon" class="pohon"></div>
-<div class="level-1">
-  <div class="kotak">Masduki + Nurhidayati</div>
-</div>
-<div class="garis-v"></div>
-<div class="garis-h" style="width:75%"></div>
 
-<div class="level-2">
-  <div><div class="kotak">Wahyudi + Khalimatus Sa'diyah</div></div>
-  <div><div class="kotak kecil">Rochayanik + Awet Setiawan</div></div>
-</div>
-<div class="level-3">
-  <div class="kotak">Aditya Shufil Mubarok + Asfiana</div>
-  <div class="kotak">Churotul Aini + Fuad Amrozi</div>
-  <div class="kotak">Muhammad Ja'far Shodiq + Virdayani</div>
-  <div class="kotak">Ahmad Mujahid Alfataki</div>
-</div>
 <script>
 // DATA 15 dari Supabase bapak
 const anggota = [
@@ -96,47 +79,7 @@ function load(){
 
   const html = `
   <div class="judul">Silsilah Keluarga Tawar - POHON</div>
-  <div class="kotak" style="margin:0 auto">Masduki + Nurhidayati</div>
-<div class="garis-v"></div>
-<div class="garis-h" style="width:100%"></div>
-<div class="level" style="gap:20px">
-  <!-- KIRI: Wahyudi -->
-  <div style="text-align:center">
-    <div class="kotak">Wahyudi + Khalimatus Sa'diyah</div>
-    <div class="garis-v"></div>
-    <div class="garis-h"></div>
-    <div class="level" style="gap:15px">
-      <div>
-        <div class="kotak" style="font-size:13px">Aditya Shufil Mubarok + Asfiana</div>
-        <div class="garis-v"></div>
-        <div class="anak-wrap">
-          <div class="anak">1. Azalia Nada Hibatulla</div>
-          <div class="anak">2. Ahmad Romadlon</div>
-          <div class="anak">3. Muh. Hafidz</div>
-          <div class="anak">4. Moh. Husain</div>
-        </div>
-      </div>
-      <div>
-        <div class="kotak" style="font-size:13px">Churotul Aini + Fuad Amrozi</div>
-        <div class="garis-v"></div>
-        <div class="anak-wrap">
-          <div class="anak">1. Umar (2010-01-01)</div>
-          <div class="anak">2. Fatimah (2010-01-02)</div>
-        </div>
-      </div>
-      <div><div class="kotak">Muhammad Ia'far Shodiq + Virdayani</div></div>
-      <div><div class="kotak">Ahmad Mujahid Alhataki</div></div>
-    </div>
-  </div>
 
-  <!-- KANAN: Rochayanik -->
-  <div style="text-align:center">
-    <div class="kotak">Rochayanik + Awet Setiawan</div>
-    <div class="garis-v"></div>
-    <div class="anak-wrap">
-      <div class="anak">1. Abidzar</div>
-      <div class="anak">2. Azar</div>
-    </div>
 </div>
   </div>
 
