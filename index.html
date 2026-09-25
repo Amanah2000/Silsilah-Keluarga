@@ -49,7 +49,30 @@
 <body>
 <div class="tabs"><button id="bData" class="active" onclick="switchTab('data')">DATA</button><button id="bPohon" onclick="switchTab('pohon')">POHON</button></div>
 <div id="dataWrap"><div id="status">Memuat...</div><div id="list"></div></div>
-<div id="pohonWrap" style="display:none"><div id="pohonView">Memuat pohon...</div></div>
+<div id="pohon"></div>
+<script>
+const data = [
+ {nama:'Masduki', tgl:'1949-08-06', ayah:'', ibu:''},
+ {nama:'Wahyudi', tgl:'1965-08-06', ayah:'Masduki', ibu:'Nurhidayati'},
+ {nama:'Rochayanik', tgl:'1972-01-01', ayah:'Masduki', ibu:'Nurhidayati'},
+ {nama:'Aditya SM', tgl:'1989-12-31', ayah:'Wahyudi', ibu:'Khalimatus S'},
+ {nama:'Churotul Aini', tgl:'1993-05-15', ayah:'Wahyudi', ibu:'Khalimatus S'},
+ {nama:'Muhammad IS', tgl:'1994-02-21', ayah:'Wahyudi', ibu:'Khalimatus S'},
+ {nama:'Ahmad Mujahid', tgl:'1997-12-04', ayah:'Wahyudi', ibu:'Khalimatus S'},
+];
+
+// Urutkan anak by tanggal lahir biar posisi benar
+function getAnak(ayah, ibu){
+  return anggota.filter(a => a.ayah==ayah && a.ibu==ibu)
+  .sort((a,b) => new Date(a.tgl_lahir) - new Date(b.tgl_lahir));
+}
+</script>
+
+<style>
+.garis-v{width:3px;height:25px;background:black;margin:0 auto}
+.garis-h{border-top:3px solid black;display:flex;gap:12px;justify-content:center;padding-top:12px}
+.kotak{border:2px solid black;padding:6px 12px;text-align:center;background:white}
+</style>
 <div id="fotoModal" onclick="this.style.display='none'"><img id="bigFoto" src=""></div>
 <div className="pasangan">
   <div className="ayah">{ayah.foto ? <img src={ayah.foto}/> : 'NO '+ayah.nama} </div>
