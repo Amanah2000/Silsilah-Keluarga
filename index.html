@@ -123,25 +123,41 @@ function buildTree(){
   return roots;
 }
 function nodeHTML(node,isRoot){
-  let f1=node.foto_url?`<img src="${node.foto_url}" class="node-foto" onclick="showFoto('${node.foto_url}')">`:`<div class="node-no-foto">NO FOTO</div>`;
-  let f2=node.foto_pasangan_url?`<img src="${node.foto_pasangan_url}" class="node-foto pasangan" onclick="showFoto('${node.foto_pasangan_url}')">`:`<div class="node-no-foto" style="border-color:#f99">NO FOTO</div>`;
+  let f1=node.foto_url?`<img src="${node.foto_url}" class="node-foto" onclick="event.stopPropagation();showFoto('${node.foto_url}')">`:`<div class="node-no-foto">NO FOTO</div>`;
+  let f2=node.foto_pasangan_url?`<img src="${node.foto_pasangan_url}" class="node-foto pasangan" onclick="event.stopPropagation();showFoto('${node.foto_pasangan_url}')">`:`<div class="node-no-foto" style="border-color:#f99">NO FOTO</div>`;
   let b1=`<div style="display:flex;flex-direction:column;align-items:center">${f1}<div class="node-label">${node.nama}</div><div class="node-tgl">${node.tgl_lahir||''}</div></div>`;
   let b2=node.pasangan?`<div style="display:flex;flex-direction:column;align-items:center">${f2}<div class="node-label" style="color:#b00">${node.pasangan}</div><div class="node-tgl" style="color:#b00">${node.tgl_lahir_pasangan||''}</div></div>`:"";
-  let childs=node.children&&node.children.length?`<div style="display:flex;gap:8px;margin-top:10px;justify-content:center;flex-wrap:wrap;border-top:1.5px solid #000;padding-top:8px">${node.children.sort((a,b)=>(a.tgl_lahir||'').localeCompare(b.tgl_lahir||'')).map(c=>`<div>${nodeHTML(c,false)}</div>`).join("")}</div>`:"";
-  return `<div class="node-box ${isRoot?'root':''}"><div style="display:flex;gap:10px;justify-content:center">${b1}${b2}</div>${childs}</div>`;
+  
+  let childHTML = "";
+  if(node.children && node.children.length){
+    // urut: Wahyudi dulu, baru Rochayanik, baru lainnya by tanggal
+    node.children.sort((a,b)=>{
+      if(a.nama.toLowerCase().includes('wahyudi')) return -1;
+      if(b.nama.toLowerCase().includes('wahyudi')) return 1;
+      if(a.nama.toLowerCase().includes('rochayanik')) return -1;
+      if(b.nama.toLowerCase().includes('rochayanik')) return 1;
+      return (a.tgl_lahir||'').localeCompare(b.tgl_lahir||'');
+    });
+    childHTML = `<div style="display:flex;gap:8px;margin-top:8px;justify-content:center;flex-wrap:wrap">${node.children.map(c=>nodeHTML(c,false)).join("")}</div>`;
+  }
+  
+  return `
+  <div style="display:flex;flex-direction:column;align-items:center">
+    <div class="node-box ${isRoot?'root':''}">
+      <div style="display:flex;gap:8px;justify-content:center">${b1}${b2}</div>
+    </div>
+    ${node.children&&node.children.length?`<div style="width:1px;height:10px;background:#000"></div>`:''}
+    ${childHTML}
+  </div>`;
 }
+
 function renderPohon(){
   let roots=buildTree();
   let masduki=roots.find(r=>r.nama.toLowerCase().includes('masduki'));
   if(masduki){
-    masduki.children.sort((a,b)=>{
-      if(a.nama.toLowerCase().includes('wahyudi')) return -1;
-      if(b.nama.toLowerCase().includes('wahyudi')) return 1;
-      return (a.tgl_lahir||'').localeCompare(b.tgl_lahir||'');
-    });
-    document.getElementById("pohonView").innerHTML=`<div style="display:flex;justify-content:center;overflow:auto">${nodeHTML(masduki,true)}</div>`;
+    document.getElementById("pohonView").innerHTML=`<div style="display:flex;justify-content:center;padding:10px">${nodeHTML(masduki,true)}</div>`;
   }else{
-    document.getElementById("pohonView").innerHTML=roots.map(r=>`<div style="margin-bottom:12px;display:flex;justify-content:center">${nodeHTML(r,true)}</div>`).join("");
+    document.getElementById("pohonView").innerHTML=roots.map(r=>`<div style="margin-bottom:16px;display:flex;justify-content:center">${nodeHTML(r,true)}</div>`).join("");
   }
 }
 function switchTab(t){document.getElementById("bData").classList.toggle("active",t=="data"); document.getElementById("bPohon").classList.toggle("active",t=="pohon"); document.getElementById("dataWrap").style.display=t=="data"?"block":"none"; document.getElementById("pohonWrap").style.display=t=="pohon"?"block":"none"; if(t=="pohon") renderPohon();}
