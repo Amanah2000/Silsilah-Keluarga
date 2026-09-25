@@ -1,91 +1,73 @@
 <!DOCTYPE html>
 <html><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Silsilah Masduki - Mini Box</title>
+<title>Silsilah Final</title>
 <style>
 *{font-family:Consolas,monospace;box-sizing:border-box}
-body{margin:0}
-.tabs{display:flex;position:sticky;top:0;z-index:10}
-.tabs button{flex:1;padding:12px;border:1px solid #000;background:#fff;font-weight:bold;cursor:pointer}
+body{margin:0;background:#fff}
+.tabs{display:flex;position:sticky;top:0;z-index:20}
+.tabs button{flex:1;padding:10px;border:1px solid #000;background:#fff;font-weight:bold}
 .tabs button.active{background:#000;color:#fff}
-#pohonView{padding:8px;overflow:auto;background:#fff;min-height:80vh}
-.node-box{border:1px solid #000;padding:2px;background:#fff;display:inline-block}
-.node-box.root{border:1.5px solid #000;background:#ffffe0}
-.node-foto{width:24px;height:24px;border:1px solid #000;object-fit:cover;cursor:pointer;display:block}
-.node-foto.pasangan{border-color:#b00}
-.node-no{width:24px;height:24px;border:1px dashed #999;display:flex;align-items:center;justify-content:center;font-size:5px}
-.node-n{font-size:6px;font-weight:bold;max-width:46px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center}
-.node-t{font-size:5px;text-align:center}
-#fotoModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:999;align-items:center;justify-content:center;padding:10px}
+#pohonView{padding:12px;overflow:auto;text-align:center}
+.node{display:inline-flex;flex-direction:column;align-items:center;vertical-align:top;margin:4px}
+.pair{display:flex;gap:4px}
+.box{width:52px;border:1.5px solid #000;padding:2px;background:#fff}
+.box.spouse{border-style:dashed;border-color:#b00}
+.box.root{background:#ffffe0}
+.box img{width:100%;height:36px;object-fit:cover;border:1px solid #000;display:block;cursor:pointer}
+.box.no{width:100%;height:36px;border:1px dashed #999;display:flex;align-items:center;justify-content:center;font-size:7px}
+.box.n{font-size:7px;font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.box.n.red{color:#b00}
+.line-v{width:1px;height:10px;background:#000}
+.line-h{height:1px;background:#000;margin:0 auto}
+.children{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:10px}
+#fotoModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:99;align-items:center;justify-content:center}
 #fotoModal img{max-width:95%;max-height:90%;border:3px solid #fff}
-.row{display:flex;gap:8px;padding:6px;border-bottom:1px solid #000;align-items:center;font-size:12px}
-.row img{width:36px;height:36px;border:1px solid #000;object-fit:cover}
 </style>
 </head>
 <body>
 <div class="tabs"><button id="bData" class="active" onclick="switchTab('data')">DATA</button><button id="bPohon" onclick="switchTab('pohon')">POHON</button></div>
-<div id="dataWrap"><input id="cari" placeholder="Cari..." oninput="render()" style="width:100%;padding:10px;border:1px solid #000"><div id="status" style="padding:6px;font-size:11px;background:#ffe;border-bottom:1px solid #000"></div><div id="list"></div></div>
-<div id="pohonWrap" style="display:none"><div id="pohonView">Memuat...</div></div>
-<div id="fotoModal" onclick="this.style.display='none'"><img id="fotoBig" src=""></div>
-
+<div id="dataWrap"><div id="list"></div></div>
+<div id="pohonWrap" style="display:none"><div id="pohonView"></div></div>
+<div id="fotoModal" onclick="this.style.display='none'"><img id="big" src=""></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
 <script>
-const SUPABASE_URL="https://aftvoyxwsmdcedvxehuh.supabase.co";
-const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmdHZveXh3c21kY2VkdnhlaHVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxMjQ4NzcsImV4cCI6MjEwNTcwMDg3N30.QERB57Nn6mTbUSKWwzVI_a6BVjxt9s77hV_IJFsHstM";
-const supa = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const supa=supabase.createClient("https://aftvoyxwsmdcedvxehuh.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmdHZveXh3c21kY2VkdnhlaHVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxMjQ4NzcsImV4cCI6MjEwNTcwMDg3N30.QERB57Nn6mTbUSKWwzVI_a6BVjxt9s77hV_IJFsHstM");
 let data=[];
-function showFoto(u){if(!u)return;document.getElementById('fotoBig').src=u;document.getElementById('fotoModal').style.display='flex';}
-async function load(){
- document.getElementById('status').innerText='Memuat...';
- let {data:d,error} = await supa.from('anggota').select('*').order('tgl_lahir',{ascending:true});
- if(error){document.getElementById('status').innerText='ERROR: '+error.message;return;}
- data=d||[];
- document.getElementById('status').innerText='Total: '+data.length+' data | Rochayanik posisi 3 ✅';
- render();renderPohon();
-}
-function render(){
- let q=(document.getElementById('cari').value||'').toLowerCase();
- let f=data.filter(x=>(x.nama||'').toLowerCase().includes(q));
- let s=[...f].sort((a,b)=>(a.tgl_lahir||'9999').localeCompare(b.tgl_lahir||'9999'));
- if(!q){let i=s.findIndex(x=>x.nama.toLowerCase().includes('rochayanik'));if(i>2){let[t]=s.splice(i,1);s.splice(2,0,t);}}
- let list=document.getElementById('list');list.innerHTML='';
- s.forEach(r=>{
-  let img=r.foto_url?`<img src="${r.foto_url}" onclick="showFoto('${r.foto_url}')" style="cursor:pointer">`:`<div style="width:36px;height:36px;border:1px solid #000;background:#eee"></div>`;
-  let div=document.createElement('div');div.className='row';
-  div.innerHTML=`${img}<div><b>${r.nama}</b> <small>(${r.tgl_lahir||''})</small><br><small>ayah:${r.ayah||'-'} ibu:${r.ibu||'-'} | 💑 ${r.pasangan||'-'}</small></div>`;
-  list.appendChild(div);
- });
-}
-function buildTree(){
- let map={};data.forEach(d=>{map[d.nama.toLowerCase().trim()]={...d,children:[]}});
+function showFoto(u){document.getElementById('big').src=u;document.getElementById('fotoModal').style.display='flex';}
+async function load(){let {data:d}=await supa.from('anggota').select('*').order('tgl_lahir');data=d||[];renderPohon();}
+function build(){
+ let m={};data.forEach(x=>m[x.nama.toLowerCase().trim()]={...x,children:[]});
  let anak=new Set();
- data.forEach(d=>{
-  let me=d.nama.toLowerCase().trim();let a=(d.ayah||'').toLowerCase().trim();let ib=(d.ibu||'').toLowerCase().trim();
-  let p=map[a]||map[ib]||null;
-  if(!p&&ib){Object.values(map).forEach(x=>{if(x.pasangan&&x.pasangan.toLowerCase().trim()==ib)p=x;});}
-  if(p&&p.nama.toLowerCase().trim()!=me){p.children.push(map[me]);anak.add(me);}
+ data.forEach(x=>{
+  let me=x.nama.toLowerCase().trim();let a=(x.ayah||'').toLowerCase().trim();let ib=(x.ibu||'').toLowerCase().trim();
+  let p=m[a]||m[ib]||null;
+  if(!p&&ib) Object.values(m).forEach(v=>{if(v.pasangan&&v.pasangan.toLowerCase().trim()==ib) p=v;});
+  if(p&&p.nama.toLowerCase().trim()!=me){p.children.push(m[me]);anak.add(me);}
  });
- return Object.values(map).filter(n=>!anak.has(n.nama.toLowerCase().trim()));
+ return Object.values(m).filter(x=>!anak.has(x.nama.toLowerCase().trim()));
+}
+function boxHTML(n,isSpouse){
+ let foto=n.foto_url||n.foto_pasangan_url;
+ let img=foto?`<img src="${foto}" onclick="showFoto('${foto}')">`:`<div class="no">NO</div>`;
+ let name=isSpouse?(n.pasangan||''):(n.nama||'');
+ return `<div class="box ${isSpouse?'spouse':''} ${n.nama.toLowerCase().includes('masduki')&&!isSpouse?'root':''}">${img}<div class="n ${isSpouse?'red':''}">${name.split(' ')[0]}</div></div>`;
 }
 function nodeHTML(node){
- let f1=node.foto_url?`<img src="${node.foto_url}" class="node-foto" onclick="showFoto('${node.foto_url}')">`:`<div class="node-no">NO</div>`;
- let f2=node.pasangan&&node.foto_pasangan_url?`<img src="${node.foto_pasangan_url}" class="node-foto pasangan" onclick="showFoto('${node.foto_pasangan_url}')">`:`<div class="node-no" style="border-color:#f99">NO</div>`;
- if(!node.pasangan) f2='';
- let b1=`<div style="display:flex;flex-direction:column;align-items:center">${f1}<div class="node-n">${node.nama.split(' ')[0]}</div></div>`;
- let b2=node.pasangan?`<div style="display:flex;flex-direction:column;align-items:center">${f2}<div class="node-n" style="color:#b00">${node.pasangan.split(' ')[0]}</div></div>`:'';
+ let pair=`<div class="pair">${boxHTML(node,false)}${node.pasangan?boxHTML({pasangan:node.pasangan,foto_pasangan_url:node.foto_pasangan_url},true):''}</div>`;
  let kids='';
  if(node.children&&node.children.length){
   node.children.sort((a,b)=>(a.tgl_lahir||'').localeCompare(b.tgl_lahir||''));
-  kids=`<div style="display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin-top:6px">${node.children.map(c=>nodeHTML(c)).join('')}</div>`;
+  kids=`<div class="line-v"></div><div class="children">${node.children.map(c=>`<div class="node">${nodeHTML(c)}</div>`).join('')}</div>`;
  }
- return `<div style="display:flex;flex-direction:column;align-items:center"><div class="node-box ${node.nama.toLowerCase().includes('masduki')?'root':''}"><div style="display:flex;gap:3px">${b1}${b2}</div></div>${node.children&&node.children.length?`<div style="width:1px;height:6px;background:#000"></div>${kids}`:''}</div>`;
+ return `${pair}${kids}`;
 }
 function renderPohon(){
- let roots=buildTree();
- if(!roots.length){document.getElementById('pohonView').innerHTML='Data kosong';return;}
- let m=roots.find(r=>r.nama.toLowerCase().includes('masduki'));
- if(m){document.getElementById('pohonView').innerHTML=`<div style="display:flex;justify-content:center">${nodeHTML(m)}</div>`;}
- else{document.getElementById('pohonView').innerHTML=roots.map(r=>`<div style="margin-bottom:8px;display:flex;justify-content:center">${nodeHTML(r)}</div>`).join('');}
+ let roots=build();
+ let mas=roots.find(r=>r.nama.toLowerCase().includes('masduki'));
+ let html=mas?`<div class="node">${nodeHTML(mas)}</div>`:roots.map(r=>`<div class="node">${nodeHTML(r)}</div>`).join('');
+ document.getElementById('pohonView').innerHTML=html;
+ document.getElementById('list').innerHTML=`<div style="padding:8px;font-size:12px">Total ${data.length} - Aditya anak: ${ (build().find(r=>r.nama.toLowerCase().includes('masduki'))?.children?.[0]?.children?.find(c=>c.nama.toLowerCase().includes('aditya'))?.children?.length||0) } orang (Azalia, Ahmad R, Muhammad HF, Muhammad HS)</div>`;
 }
 function switchTab(t){document.getElementById('bData').classList.toggle('active',t=='data');document.getElementById('bPohon').classList.toggle('active',t=='pohon');document.getElementById('dataWrap').style.display=t=='data'?'block':'none';document.getElementById('pohonWrap').style.display=t=='pohon'?'block':'none';if(t=='pohon')renderPohon();}
 load();
