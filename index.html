@@ -2,108 +2,92 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>Silsilah Keluarga Tawar - POHON</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Silsilah Keluarga Tawar</title>
 <style>
-body{font-family:Arial;background:#fff;padding:10px;overflow-x:auto}
-#total{font-weight:bold;margin-bottom:10px}
-.pohon{text-align:center;min-width:1200px}
-.judul{font-size:22px;font-weight:bold;margin-bottom:20px}
+body{font-family:Arial;background:#fff;padding:15px;margin:0}
+#total{font-weight:bold}
+.judul{font-size:20px;font-weight:bold;text-align:center;margin:15px 0}
+.pohon{text-align:center;overflow-x:auto;padding-bottom:20px}
 
-/* GARIS */
-.garis-v{width:3px;height:25px;background:black;margin:0 auto}
-.garis-h{height:3px;background:black;width:100%}
+.garis-v{width:3px;height:20px;background:#000;margin:0 auto}
+.garis-h{height:3px;background:#000;margin:0 auto}
 
-/* KOTAK UMUM */
-.kotak{border:2px solid black;background:white;border-radius:8px;
+.kotak{border:2px solid #000;background:#fff;border-radius:8px;
        display:flex;align-items:center;justify-content:center;
-       text-align:center;padding:8px}
+       text-align:center;box-sizing:border-box}
 
-/* LEVEL 1: Masduki */
-.level-1 .kotak{width:500px;height:40px;margin:0 auto}
+/* LEVEL 1 */
+.l1 .kotak{width:320px;height:38px;margin:0 auto;font-weight:bold}
 
-/* LEVEL 2: Wahyudi & Rochayanik */
-.level-2{display:flex;justify-content:center;gap:40px;margin:20px 0}
-.level-2 .kotak{width:450px;height:45px}
-.level-2 .kotak.kecil{width:160px;height:45px}
+/* LEVEL 2 */
+.l2{display:flex;justify-content:center;gap:20px;margin-top:0}
+.l2 .kotak{width:320px;height:42px;font-size:13px}
 
-/* LEVEL 3: Aditya, Churotul, Muhammad, Ahmad */
-.level-3{display:flex;justify-content:center;gap:15px;margin:20px 0}
-.level-3 .kotak{width:240px;height:45px;font-size:12px}
+/* LEVEL 3 */
+.l3{display:flex;justify-content:center;gap:12px;margin-top:0}
+.l3 .kotak{width:200px;height:42px;font-size:11px}
 
-/* LEVEL 4: cucu - Azalia dll */
-.level-4{display:flex;justify-content:center;gap:10px}
-.level-4 .anak-wrap{display:flex;gap:8px;justify-content:center;border-top:3px solid black;padding-top:12px;margin-top:0}
-.level-4 .anak{width:110px;height:45px;border:2px solid black;border-radius:6px;
-               display:flex;align-items:center;justify-content:center;
-               font-size:11px;text-align:center;padding:4px}
+/* LEVEL 4 cucu */
+.l4{display:flex;justify-content:center;gap:10px;margin-top:0}
+.anak-wrap{display:flex;gap:6px;justify-content:center;border-top:3px solid #000;padding-top:10px;margin-top:0}
+.anak{width:95px;height:42px;border:2px solid #000;border-radius:6px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:10px;text-align:center;padding:3px;box-sizing:border-box;background:#fff}
 </style>
 </head>
 <body>
+<div id="total">Total: 21 data - OK</div>
+<div class="judul">Silsilah Keluarga Tawar - POHON</div>
+<div class="pohon" id="pohon"></div>
 
 <script>
-// DATA 15 dari Supabase bapak
-const anggota = [
-{nama:'Masduki', tgl:'1949-08-06', ayah:'', ibu:''},
-{nama:'Nurhidayati', tgl:'', ayah:'', ibu:'', pasangan:'Masduki'},
-{nama:'Wahyudi', tgl:'1965-08-06', ayah:'Masduki', ibu:'Nurhidayati'},
-{nama:'Khalimatus S', tgl:'', ayah:'', ibu:'', pasangan:'Wahyudi'},
-{nama:'Rochayanik', tgl:'1972-01-01', ayah:'Masduki', ibu:'Nurhidayati'},
-{nama:'Awet Setiawan', tgl:'', ayah:'', ibu:'', pasangan:'Rochayanik'},
-{nama:'Aditya SM', tgl:'1989-12-31', ayah:'Wahyudi', ibu:'Khalimatus S'},
-{nama:'Asfiana', tgl:'', ayah:'', ibu:'', pasangan:'Aditya SM'},
-{nama:'Churotul Aini', tgl:'1993-05-15', ayah:'Wahyudi', ibu:'Khalimatus S'},
-{nama:'Fuad Amrozi', tgl:'', ayah:'', ibu:'', pasangan:'Churotul Aini'},
-{nama:'Muhammad IS', tgl:'1994-02-21', ayah:'Wahyudi', ibu:'Khalimatus S'},
-{nama:'Virdayani', tgl:'', ayah:'', ibu:'', pasangan:'Muhammad IS'},
-{nama:'Ahmad Mujahid', tgl:'1997-12-04', ayah:'Wahyudi', ibu:'Khalimatus S'},
-{nama:'Azalia', tgl:'2005-02-01', ayah:'Aditya SM', ibu:'Asfiana'},
-{nama:'Ahmad Romadlon', tgl:'2005-02-02', ayah:'Aditya SM', ibu:'Asfiana'},
-{nama:'Muhammad Hafidz', tgl:'2005-02-03', ayah:'Aditya SM', ibu:'Asfiana'},
-{nama:'Muhammad Husain', tgl:'2005-02-04', ayah:'Aditya SM', ibu:'Asfiana'},
-{nama:'Umar', tgl:'2010-01-01', ayah:'Fuad Amrozi', ibu:'Churotul Aini'},
-{nama:'Fatimah', tgl:'2010-01-02', ayah:'Fuad Amrozi', ibu:'Churotul Aini'},
-{nama:'Abidzar', tgl:'2012-01-01', ayah:'Awet Setiawan', ibu:'Rochayanik'},
-{nama:'Azar', tgl:'2012-01-02', ayah:'Awet Setiawan', ibu:'Rochayanik'},
-];
-
-function getAnak(ayah, ibu){
-  return anggota.filter(a=>a.ayah===ayah && a.ibu===ibu).sort((a,b)=>new Date(a.tgl)-new Date(b.tgl));
-}
-
-function load(){
-  const elTotal = document.getElementById('total');
-  const elPohon = document.getElementById('pohon');
-  if(!elTotal || !elPohon) return;
-
-  elTotal.innerText = `Total: ${anggota.length} data - OK`;
-
-  const html = `
-  <div class="judul">Silsilah Keluarga Tawar - POHON</div>
-<div class="level-1">
-  <div class="kotak">Masduki + Nurhidayati</div>
-</div>
-<div class="garis-v"></div>
-<div class="garis-h" style="width:75%"></div>
-
-<div class="level-2">
-  <div><div class="kotak">Wahyudi + Khalimatus Sa'diyah</div></div>
-  <div><div class="kotak kecil">Rochayanik + Awet Setiawan</div></div>
-</div>
-
-<div class="level-3">
-  <div class="kotak">Aditya Shufil Mubarok + Asfiana</div>
-  <div class="kotak">Churotul Aini + Fuad Amrozi</div>
-  <div class="kotak">Muhammad Ja'far Shodiq + Virdayani</div>
-  <div class="kotak">Ahmad Mujahid Alfataki</div>
-</div>
-</div>
+function render(){
+ const el=document.getElementById('pohon');
+ if(!el) return;
+ el.innerHTML=`
+  <div class="l1"><div class="kotak">Masduki + Nurhidayati</div></div>
+  <div class="garis-v"></div>
+  <div class="garis-h" style="width:70%"></div>
+  
+  <div class="l2">
+    <div><div class="kotak">Wahyudi + Khalimatus Sa'diyah</div><div class="garis-v"></div><div class="garis-h"></div></div>
+    <div><div class="kotak" style="width:180px">Rochayanik + Awet Setiawan</div><div class="garis-v"></div><div class="garis-h"></div></div>
   </div>
 
-  `;
-  elPohon.innerHTML = html;
+  <div class="l3">
+    <div style="text-align:center">
+      <div class="kotak">Aditya Shufil Mubarok + Asfiana</div>
+      <div class="garis-v"></div>
+      <div class="garis-h"></div>
+      <div class="anak-wrap">
+        <div class="anak">1. Azalia Nada Hibatulla</div>
+        <div class="anak">2. Ahmad Romadlon</div>
+        <div class="anak">3. Muh. Hafidz</div>
+        <div class="anak">4. Moh. Husain</div>
+      </div>
+    </div>
+    <div style="text-align:center">
+      <div class="kotak">Churotul Aini + Fuad Amrozi</div>
+      <div class="garis-v"></div>
+      <div class="garis-h" style="width:80%"></div>
+      <div class="anak-wrap">
+        <div class="anak">1. Umar (2010-01-01)</div>
+        <div class="anak">2. Fatimah (2010-01-02)</div>
+      </div>
+    </div>
+    <div><div class="kotak">Muhammad Ja'far Shodiq + Virdayani</div></div>
+    <div><div class="kotak">Ahmad Mujahid Alfataki</div></div>
+    <div style="text-align:center">
+      <div style="display:flex;gap:6px;border-top:3px solid #000;padding-top:10px">
+        <div class="anak">1. Abidzar</div>
+        <div class="anak">2. Azar</div>
+      </div>
+    </div>
+  </div>
+ `;
 }
-
-window.addEventListener('DOMContentLoaded', load);
+document.addEventListener('DOMContentLoaded', render);
 </script>
 </body>
 </html>
