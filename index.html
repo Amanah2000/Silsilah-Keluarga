@@ -108,9 +108,56 @@ function openEdit(idx){editIdx=idx; let r=data[idx]; document.getElementById("e_
 function closeModal(){document.getElementById("modal").style.display="none";}
 async function simpanEdit(){let r=data[editIdx]; let baru={nama:document.getElementById("e_nama").value.trim(), ayah:document.getElementById("e_ayah").value.trim(), ibu:document.getElementById("e_ibu").value.trim(), pasangan:document.getElementById('e_pasangan').value.trim()||null, tgl_lahir:document.getElementById("e_tgl").value||null, tgl_lahir_pasangan:document.getElementById("e_tgl_pasangan").value||null, foto_url:document.getElementById("e_foto_url").value||null, foto_pasangan_url:document.getElementById("e_foto_pasangan_url").value||null}; await supa.from("anggota").update(baru).eq("id",r.id); data[editIdx]={...r,...baru}; closeModal(); render(); renderPohon();}
 async function tambah(){let nama=document.getElementById("namaBaru").value.trim(); if(!nama)return; let {data:d}=await supa.from("anggota").insert([{nama}]).select(); if(d&&d[0]) data.push(d[0]); else data.push({nama}); document.getElementById("namaBaru").value=""; render(); renderPohon();}
-function buildTree(){let map={}; data.forEach(d=>{map[d.nama]={...d, children:[]};}); data.forEach(d=>{if(d.ayah &&!map[d.ayah]) map[d.ayah]={nama:d.ayah, children:[], placeholder:true};}); Object.values(map).forEach(n=>{if(n.ayah && map[n.ayah] && n.nama!=map[n.ayah].nama) map[n.ayah].children.push(n);}); return Object.values(map).filter(n=>!n.ayah ||!map[n.ayah]);}
-function nodeHTML(node,isRoot){let foto1=node.foto_url?`<img src="${node.foto_url}" style="width:60px;height:60px;border:1.5px solid #000;object-fit:cover">`:`<div style="width:60px;height:60px;border:1.5px dashed #aaa;display:flex;align-items:center;justify-content:center;font-size:8px">NO FOTO</div>`; let foto2=node.foto_pasangan_url?`<img src="${node.foto_pasangan_url}" style="width:60px;height:60px;border:1.5px solid #b00;object-fit:cover">`:`<div style="width:60px;height:60px;border:1.5px dashed #f99;display:flex;align-items:center;justify-content:center;font-size:8px">NO FOTO</div>`; let block1=`<div style="display:flex;flex-direction:column;align-items:center;width:80px;text-align:center;gap:2px">${foto1}<b style="font-size:10px;line-height:11px;word-break:break-word">${node.nama}</b><span style="font-size:9px">${node.tgl_lahir||''}</span></div>`; let block2=node.pasangan?`<div style="display:flex;flex-direction:column;align-items:center;width:80px;text-align:center;gap:2px">${foto2}<b style="font-size:10px;line-height:11px;color:#b00;word-break:break-word">${node.pasangan}</b><span style="font-size:9px;color:#b00">${node.tgl_lahir_pasangan||''}</span></div>`:""; let childs=node.children&&node.children.length?`<div style="display:flex;gap:14px;margin-top:22px;justify-content:center">${node.children.map(c=>`<div>${nodeHTML(c,false)}</div>`).join("")}</div>`:""; return `<div style="display:flex;flex-direction:column;align-items:center"><div style="border:2px solid #000;padding:10px 12px;background:${isRoot?'#ffe':'#fff'};min-width:190px"><div style="display:flex;gap:16px;justify-content:center;align-items:flex-start">${block1}${block2}</div></div>${childs}</div>`;}
-function renderPohon(){let roots=buildTree(); document.getElementById("pohonView").innerHTML=roots.map(r=>nodeHTML(r,true)).join("<br><br>");}
+function buildTree(){
+  let map={};
+  data.forEach(d=>{ map[d.nama]={...d, children:[]} });
+
+  // cari orang tua, cek ayah DAN ibu DAN pasangan orang tua
+  data.forEach(d=>{
+    let parent = null;
+    if(d.ayah && map[d.ayah]) parent = map[d.ayah];
+    if(!parent && d.ibu && map[d.ibu]) parent = map[d.ibu];
+    // kalau ayah/ibu tertulis nama pasangan (Nurhidayati) tetap nyambung ke Masduki
+    if(!parent){
+      Object.values(map).forEach(p=>{
+        if(p.nama==d.ayah || p.pasangan==d.ayah || p.nama==d.ibu || p.pasangan==d.ibu){
+          parent = p;
+        }
+      });
+    }
+    if(parent && parent.nama!=d.nama){
+      if(!parent.children.find(c=>c.nama==d.nama)){
+        parent.children.push(map[d.nama]);
+      }
+    }
+  });
+
+  let jadiAnak = new Set();
+  Object.values(map).forEach(p=>p.children.forEach(c=>jadiAnak.add(c.nama)));
+  let roots = Object.values(map).filter(n=>!jadiAnak.has(n.nama));
+
+  // urut anak by tgl lahir, paksa Rochayanik jadi anak ke-2 Masduki
+  roots.forEach(r=>{
+    r.children.sort((a,b)=>(a.tgl_lahir||'9999').localeCompare(b.tgl_lahir||'9999'));
+    let idxR = r.children.findIndex(x=>x.nama.toLowerCase().includes('rochayanik'));
+    if(idxR>1){
+      let [roch] = r.children.splice(idxR,1);
+      r.children.splice(1,0,roch); // jadi urutan ke-2 setelah Wahyudi
+    }
+  });
+  roots.sort((a,b)=>(a.tgl_lahir||'9999').localeCompare(b.tgl_lahir||'9999'));
+  return roots;
+}
+
+function nodeHTML(node,isRoot){
+  let foto1=node.foto_url?`<img src="${node.foto_url}" style="width:60px;height:60px;border:1.5px solid #000;object-fit:cover">`:`<div style="width:60px;height:60px;border:1.5px dashed #aaa;display:flex;align-items:center;justify-content:center;font-size:8px">NO FOTO</div>`;
+  let foto2=node.foto_pasangan_url?`<img src="${node.foto_pasangan_url}" style="width:60px;height:60px;border:1.5px solid #b00;object-fit:cover">`:`<div style="width:60px;height:60px;border:1.5px dashed #f99;display:flex;align-items:center;justify-content:center;font-size:8px">NO FOTO</div>`;
+  let block1=`<div style="display:flex;flex-direction:column;align-items:center;width:80px;text-align:center;gap:2px">${foto1}<b style="font-size:10px;line-height:11px;word-break:break-word">${node.nama}</b><span style="font-size:9px">${node.tgl_lahir||''}</span></div>`;
+  let block2=node.pasangan?`<div style="display:flex;flex-direction:column;align-items:center;width:80px;text-align:center;gap:2px">${foto2}<b style="font-size:10px;line-height:11px;color:#b00;word-break:break-word">${node.pasangan}</b><span style="font-size:9px;color:#b00">${node.tgl_lahir_pasangan||''}</span></div>`:"";
+  // garis penghubung
+  let childs=node.children&&node.children.length?`<div style="border-top:2px solid #000;margin-top:12px;padding-top:12px;display:flex;gap:20px;justify-content:center;flex-wrap:wrap">${node.children.map(c=>`<div>${nodeHTML(c,false)}</div>`).join("")}</div>`:"";
+  return `<div style="display:flex;flex-direction:column;align-items:center"><div style="border:2px solid #000;padding:10px 12px;background:${isRoot?'#ffe':'#fff'};min-width:190px"><div style="display:flex;gap:16px;justify-content:center;align-items:flex-start">${block1}${block2}</div></div>${childs}</div>`;
+}
 function switchTab(t){document.getElementById("bData").classList.toggle("active",t=="data"); document.getElementById("bPohon").classList.toggle("active",t=="pohon"); document.getElementById("dataWrap").style.display=t=="data"?"block":"none"; document.getElementById("pohonWrap").style.display=t=="pohon"?"block":"none"; if(t=="pohon") renderPohon();}
 load();
 </script>
