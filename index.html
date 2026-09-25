@@ -145,6 +145,24 @@ function nodeHTMLRapi(node){
 function renderPohon(){ let roots=buildTreeRapi(); let masduki = roots.find(r=> r.nama.toLowerCase().includes("masduki")); if(masduki){ roots = [masduki, ...roots.filter(r=>r!==masduki)]; } document.getElementById("pohonView").innerHTML = roots.map(r=>`<div style="display:inline-block;vertical-align:top;margin:12px">${nodeHTMLRapi(r)}</div>`).join(""); }
 function switchTab(t){ document.getElementById("bData").classList.toggle("active",t=="data"); document.getElementById("bPohon").classList.toggle("active",t=="pohon"); document.getElementById("dataWrap").style.display=t=="data"?"block":"none"; document.getElementById("pohonWrap").style.display=t=="pohon"?"block":"none"; if(t=="pohon") renderPohon(); }
 load();
+  <div id="list"></div>
+
+<script>
+  let data = [
+    {nama:"Masduki", tanggal_lahir:"1949-08-06"},
+    {nama:"Wahyudi", tanggal_lahir:"1965-08-06"},
+    {nama:"Rochayanik", tanggal_lahir:"1972-01-01"},
+    ...
+  ];
+
+  // TARUH INI PAK DI SINI PAK!
+  data.sort((a,b) => new Date(a.tanggal_lahir) - new Date(b.tanggal_lahir));
+
+  // baru render list
+  function tampilkan(){
+    ...
+  }
+  tampilkan();
 </script>
         </div>
 </div>
