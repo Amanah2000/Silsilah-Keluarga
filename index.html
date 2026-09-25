@@ -146,7 +146,7 @@ function renderPohon(){ let roots=buildTreeRapi(); let masduki = roots.find(r=> 
 function switchTab(t){ document.getElementById("bData").classList.toggle("active",t=="data"); document.getElementById("bPohon").classList.toggle("active",t=="pohon"); document.getElementById("dataWrap").style.display=t=="data"?"block":"none"; document.getElementById("pohonWrap").style.display=t=="pohon"?"block":"none"; if(t=="pohon") renderPohon(); }
 load();
   <div id="list"></div>
-
+  <script>
   let data = [
     {nama:"Masduki", tanggal_lahir:"1949-08-06"},
     {nama:"Wahyudi", tanggal_lahir:"1965-08-06"},
