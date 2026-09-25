@@ -110,43 +110,48 @@ async function simpanEdit(){let r=data[editIdx]; let baru={nama:document.getElem
 async function tambah(){let nama=document.getElementById("namaBaru").value.trim(); if(!nama)return; let {data:d}=await supa.from("anggota").insert([{nama}]).select(); if(d&&d[0]) data.push(d[0]); else data.push({nama}); document.getElementById("namaBaru").value=""; render(); renderPohon();}
 function buildTree(){
   let map={};
-  data.forEach(d=>{ map[d.nama]={...d, children:[]} });
-
-  // cari orang tua, cek ayah DAN ibu DAN pasangan orang tua
+  // bikin map dengan kunci huruf kecil biar tidak sensitif
   data.forEach(d=>{
-    let parent = null;
-    if(d.ayah && map[d.ayah]) parent = map[d.ayah];
-    if(!parent && d.ibu && map[d.ibu]) parent = map[d.ibu];
-    // kalau ayah/ibu tertulis nama pasangan (Nurhidayati) tetap nyambung ke Masduki
-    if(!parent){
-      Object.values(map).forEach(p=>{
-        if(p.nama==d.ayah || p.pasangan==d.ayah || p.nama==d.ibu || p.pasangan==d.ibu){
-          parent = p;
-        }
-      });
-    }
-    if(parent && parent.nama!=d.nama){
-      if(!parent.children.find(c=>c.nama==d.nama)){
-        parent.children.push(map[d.nama]);
-      }
+    let k = d.nama.toLowerCase().trim();
+    map[k]={...d, _key:k, children:[]};
+  });
+  // tambahkan juga pasangan sebagai kunci biar anak yang ibu=Nurhidayati nyambung ke Masduki
+  data.forEach(d=>{
+    if(d.pasangan){
+      let kp = d.pasangan.toLowerCase().trim();
+      if(!map[kp]) map[kp] = map[d.nama.toLowerCase().trim()];
     }
   });
 
   let jadiAnak = new Set();
-  Object.values(map).forEach(p=>p.children.forEach(c=>jadiAnak.add(c.nama)));
-  let roots = Object.values(map).filter(n=>!jadiAnak.has(n.nama));
+  data.forEach(d=>{
+    let ayah = (d.ayah||"").toLowerCase().trim();
+    let ibu = (d.ibu||"").toLowerCase().trim();
+    let keyParent = null;
+    if(map[ayah]) keyParent = map[ayah]._key;
+    else if(map[ibu]) keyParent = map[ibu]._key;
 
-  // urut anak by tgl lahir, paksa Rochayanik jadi anak ke-2 Masduki
-  roots.forEach(r=>{
-    r.children.sort((a,b)=>(a.tgl_lahir||'9999').localeCompare(b.tgl_lahir||'9999'));
-    let idxR = r.children.findIndex(x=>x.nama.toLowerCase().includes('rochayanik'));
-    if(idxR>1){
-      let [roch] = r.children.splice(idxR,1);
-      r.children.splice(1,0,roch); // jadi urutan ke-2 setelah Wahyudi
+    if(keyParent){
+      let parent = map[keyParent];
+      let meKey = d.nama.toLowerCase().trim();
+      if(parent._key!= meKey &&!parent.children.find(c=>c.nama==d.nama)){
+        parent.children.push(map[meKey]);
+        jadiAnak.add(meKey);
+      }
     }
   });
-  roots.sort((a,b)=>(a.tgl_lahir||'9999').localeCompare(b.tgl_lahir||'9999'));
-  return roots;
+
+  let roots = Object.values(map).filter(n=>!jadiAnak.has(n._key));
+  // hapus duplikat root karena pasangan
+  let uniqueRoots = [];
+  let seen = new Set();
+  roots.forEach(r=>{ if(!seen.has(r._key)){ seen.add(r._key); uniqueRoots.push(r);} });
+
+  uniqueRoots.forEach(r=>{
+    r.children.sort((a,b)=>(a.tgl_lahir||'9999').localeCompare(b.tgl_lahir||'9999'));
+  });
+  uniqueRoots.sort((a,b)=>(a.tgl_lahir||'9999').localeCompare(b.tgl_lahir||'9999'));
+  return uniqueRoots;
 }
 
 function nodeHTML(node,isRoot){
