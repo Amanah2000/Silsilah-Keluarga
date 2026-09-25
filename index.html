@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Silsilah Mini Box</title>
+<title>Silsilah Masduki - Mini Box</title>
 <style>
 *{font-family:Consolas,monospace;box-sizing:border-box}
 body{margin:0}
@@ -16,10 +16,10 @@ body{margin:0}
 .node-no{width:24px;height:24px;border:1px dashed #999;display:flex;align-items:center;justify-content:center;font-size:5px}
 .node-n{font-size:6px;font-weight:bold;max-width:46px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:center}
 .node-t{font-size:5px;text-align:center}
-#fotoModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:999;align-items:center;justify-content:center}
-#fotoModal img{max-width:92%;max-height:88%;border:3px solid #fff}
+#fotoModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:999;align-items:center;justify-content:center;padding:10px}
+#fotoModal img{max-width:95%;max-height:90%;border:3px solid #fff}
 .row{display:flex;gap:8px;padding:6px;border-bottom:1px solid #000;align-items:center;font-size:12px}
-.row img{width:32px;height:32px;border:1px solid #000;object-fit:cover}
+.row img{width:36px;height:36px;border:1px solid #000;object-fit:cover}
 </style>
 </head>
 <body>
@@ -27,19 +27,20 @@ body{margin:0}
 <div id="dataWrap"><input id="cari" placeholder="Cari..." oninput="render()" style="width:100%;padding:10px;border:1px solid #000"><div id="status" style="padding:6px;font-size:11px;background:#ffe;border-bottom:1px solid #000"></div><div id="list"></div></div>
 <div id="pohonWrap" style="display:none"><div id="pohonView">Memuat...</div></div>
 <div id="fotoModal" onclick="this.style.display='none'"><img id="fotoBig" src=""></div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
 <script>
 const SUPABASE_URL="https://aftvoyxwsmdcedvxehuh.supabase.co";
-const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmdHZveXh3c21kY2VkdnhlaHVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxMjQ4NzcsImV4cCI6MjEwNTcwMDg3N30.QERB57Nn6mUzVI_a6BVjxt9s77hV_IJFsHstM";
+const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmdHZveXh3c21kY2VkdnhlaHVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxMjQ4NzcsImV4cCI6MjEwNTcwMDg3N30.QERB57Nn6mTbUSKWwzVI_a6BVjxt9s77hV_IJFsHstM";
 const supa = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let data=[];
 function showFoto(u){if(!u)return;document.getElementById('fotoBig').src=u;document.getElementById('fotoModal').style.display='flex';}
 async function load(){
- document.getElementById('status').innerText='Memuat Supabase...';
- let {data:d,error}=await supa.from('anggota').select('*').order('tgl_lahir',{ascending:true});
- if(error){document.getElementById('status').innerText='ERROR: '+error.message;console.error(error);return;}
+ document.getElementById('status').innerText='Memuat...';
+ let {data:d,error} = await supa.from('anggota').select('*').order('tgl_lahir',{ascending:true});
+ if(error){document.getElementById('status').innerText='ERROR: '+error.message;return;}
  data=d||[];
- document.getElementById('status').innerText='Total: '+data.length+' data - Rochayanik akan di posisi 3';
+ document.getElementById('status').innerText='Total: '+data.length+' data | Rochayanik posisi 3 ✅';
  render();renderPohon();
 }
 function render(){
@@ -49,9 +50,9 @@ function render(){
  if(!q){let i=s.findIndex(x=>x.nama.toLowerCase().includes('rochayanik'));if(i>2){let[t]=s.splice(i,1);s.splice(2,0,t);}}
  let list=document.getElementById('list');list.innerHTML='';
  s.forEach(r=>{
-  let img=r.foto_url?`<img src="${r.foto_url}">`:`<div style="width:32px;height:32px;border:1px solid #000;background:#eee"></div>`;
+  let img=r.foto_url?`<img src="${r.foto_url}" onclick="showFoto('${r.foto_url}')" style="cursor:pointer">`:`<div style="width:36px;height:36px;border:1px solid #000;background:#eee"></div>`;
   let div=document.createElement('div');div.className='row';
-  div.innerHTML=`${img}<div><b>${r.nama}</b><br><small>${r.tgl_lahir||''} | ayah:${r.ayah||'-'} | ${r.pasangan||''}</small></div>`;
+  div.innerHTML=`${img}<div><b>${r.nama}</b> <small>(${r.tgl_lahir||''})</small><br><small>ayah:${r.ayah||'-'} ibu:${r.ibu||'-'} | 💑 ${r.pasangan||'-'}</small></div>`;
   list.appendChild(div);
  });
 }
@@ -67,8 +68,8 @@ function buildTree(){
  return Object.values(map).filter(n=>!anak.has(n.nama.toLowerCase().trim()));
 }
 function nodeHTML(node){
- let f1=node.foto_url?`<img src="${node.foto_url}" class="node-foto" onclick="showFoto('${node.foto_url}')">`:`<div class="node-no">NO FOTO</div>`;
- let f2=node.foto_pasangan_url?`<img src="${node.foto_pasangan_url}" class="node-foto pasangan" onclick="showFoto('${node.foto_pasangan_url}')">`:`<div class="node-no" style="border-color:#f99">NO</div>`;
+ let f1=node.foto_url?`<img src="${node.foto_url}" class="node-foto" onclick="showFoto('${node.foto_url}')">`:`<div class="node-no">NO</div>`;
+ let f2=node.pasangan&&node.foto_pasangan_url?`<img src="${node.foto_pasangan_url}" class="node-foto pasangan" onclick="showFoto('${node.foto_pasangan_url}')">`:`<div class="node-no" style="border-color:#f99">NO</div>`;
  if(!node.pasangan) f2='';
  let b1=`<div style="display:flex;flex-direction:column;align-items:center">${f1}<div class="node-n">${node.nama.split(' ')[0]}</div></div>`;
  let b2=node.pasangan?`<div style="display:flex;flex-direction:column;align-items:center">${f2}<div class="node-n" style="color:#b00">${node.pasangan.split(' ')[0]}</div></div>`:'';
