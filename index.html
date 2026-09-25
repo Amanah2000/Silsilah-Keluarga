@@ -1,156 +1,80 @@
 <!DOCTYPE html>
-<html>
-<head>
+<html><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Silsilah TAU - Final Fix</title>
+<title>POHON KECIL</title>
 <style>
 *{font-family:Consolas,monospace;box-sizing:border-box}
-body{margin:0;border:2px solid #000}
-.tabs{display:flex}.tabs button{flex:1;padding:14px;border:1.5px solid #000;background:#fff;font-weight:bold;cursor:pointer}
+body{margin:0}
+.tabs{display:flex;position:sticky;top:0;z-index:10}
+.tabs button{flex:1;padding:12px;border:1px solid #000;background:#fff;font-weight:bold}
 .tabs button.active{background:#000;color:#fff}
-.row{display:flex;align-items:center;gap:10px;padding:10px;border-bottom:1px solid #000}
-.row img{width:48px;height:48px;border:1.5px solid #000;object-fit:cover}
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);align-items:center;justify-content:center;overflow:auto;padding:10px;z-index:99}
-.modal-box{background:#fff;border:2px solid #000;padding:16px;width:92%;max-width:420px;max-height:90vh;overflow:auto}
-.modal-box input{width:100%;border:1.5px solid #000;padding:10px;margin:6px 0}
-.preview{width:90px;height:90px;border:1.5px dashed #000;object-fit:cover;display:block;margin:8px 0}
-
-/* POHON SUPER KECIL BIAR TERTAMPUNG */
-#pohonView{overflow:auto;padding:10px;background:#fff}
-#pohonWrap{overflow:auto}
-.node-box{border:1px solid #000;padding:2px 3px;background:#fff;min-width:56px;display:inline-block}
-.node-box.root{background:#ffffe0;border:1.5px solid #000}
-.node-foto{width:22px;height:22px;border:1px solid #000;object-fit:cover;cursor:pointer}
+#pohonView{padding:10px;overflow:auto;min-height:80vh}
+.node-box{border:1px solid #000;padding:3px;background:#fff;display:inline-block}
+.node-box.root{border:1.5px solid #000;background:#ffffe0}
+.node-foto{width:26px;height:26px;border:1px solid #000;object-fit:cover;cursor:pointer;display:block}
 .node-foto.pasangan{border:1px solid #b00}
-.node-no-foto{width:22px;height:22px;border:1px dashed #aaa;display:flex;align-items:center;justify-content:center;font-size:5px;text-align:center}
-.node-label{font-size:6px;line-height:7px;font-weight:bold;max-width:48px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;text-align:center;margin-top:1px}
-.node-tgl{font-size:5px;text-align:center;line-height:6px}
-#fotoModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:100;align-items:center;justify-content:center;padding:20px}
-#fotoModal img{max-width:95%;max-height:90%;border:3px solid #fff}
+.node-no{width:26px;height:26px;border:1px dashed #999;display:flex;align-items:center;justify-content:center;font-size:5px}
+.node-n{font-size:7px;font-weight:bold;max-width:50px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
+.node-t{font-size:6px;text-align:center}
+#fotoModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:999;align-items:center;justify-content:center}
+#fotoModal img{max-width:92%;max-height:88%;border:3px solid #fff}
+.row{display:flex;gap:8px;padding:8px;border-bottom:1px solid #000;align-items:center}
 </style>
 </head>
 <body>
-<div class="tabs">
-<button id="bData" class="active" onclick="switchTab('data')">DATA</button>
-<button id="bPohon" onclick="switchTab('pohon')">POHON</button>
-</div>
-<div id="dataWrap">
-<div style="padding:8px;border-bottom:1.5px solid #000;display:flex;gap:8px">
-<input id="cari" placeholder="Cari nama..." oninput="render()" style="flex:1;border:1.5px solid #000;padding:10px">
-</div>
-<div style="padding:8px;display:flex;gap:8px;border-bottom:2px solid #000">
-<input id="namaBaru" placeholder="Nama Baru" style="flex:1;border:1.5px solid #000;padding:10px">
-<button onclick="tambah()" style="background:#000;color:#fff;padding:10px 16px;border:none;cursor:pointer">+ Tambah</button>
-</div>
-<div id="list"></div>
-</div>
-<div id="pohonWrap" style="display:none;padding:8px;overflow:auto"><div id="pohonView"></div></div>
+<div class="tabs"><button id="bData" class="active" onclick="switchTab('data')">DATA</button><button id="bPohon" onclick="switchTab('pohon')">POHON</button></div>
+<div id="dataWrap"><input id="cari" placeholder="Cari..." oninput="render()" style="width:100%;padding:10px;border:1px solid #000"><div id="list"></div></div>
+<div id="pohonWrap" style="display:none"><div id="pohonView"></div></div>
+<div id="fotoModal" onclick="this.style.display='none'"><img id="fotoBig" src=""></div>
 
-<div id="fotoModal" onclick="this.style.display='none'"><img id="fotoModalImg" src=""></div>
-
-<div id="modal" class="modal" onclick="if(event.target==this)closeModal()">
-<div class="modal-box">
-<h3 style="margin:0 0 10px">Edit Anggota</h3>
-<input id="e_nama" placeholder="Nama Lengkap">
-<input id="e_ayah" placeholder="Nama Ayah">
-<input id="e_ibu" placeholder="Nama Ibu">
-<hr>
-<label style="font-size:12px;font-weight:bold;background:#ffe">PASANGAN</label>
-<input id="e_pasangan" placeholder="Nama Pasangan">
-<label style="font-size:12px;font-weight:bold">TGL LAHIR Pasangan:</label>
-<input id="e_tgl_pasangan" type="date">
-<label style="font-size:12px;font-weight:bold">FOTO Pasangan:</label>
-<input id="e_file_pasangan" type="file" accept="image/*" onchange="previewFotoPasangan(this)">
-<img id="e_preview_pasangan" class="preview" src="" style="display:none">
-<input id="e_foto_pasangan_url" type="hidden">
-<button type="button" onclick="hapusFotoPasanganPak()" style="width:100%;background:#ffcccc;border:1.5px solid #000;padding:8px;font-weight:bold">HAPUS FOTO PASANGAN</button>
-<hr>
-<label style="font-size:12px;font-weight:bold">TGL LAHIR Sendiri:</label>
-<input id="e_tgl" type="date">
-<label style="font-size:12px;font-weight:bold">FOTO Sendiri:</label>
-<input id="e_file" type="file" accept="image/*" onchange="previewFoto(this)">
-<img id="e_preview" class="preview" src="" style="display:none">
-<button type="button" onclick="hapusFotoPak()" style="width:100%;margin-top:8px;background:#ffcccc;border:1.5px solid #000;padding:8px;font-weight:bold">HAPUS FOTO SENDIRI</button>
-<input id="e_foto_url" type="hidden">
-<div style="display:flex;gap:8px;margin-top:12px">
-<button onclick="simpanEdit()" style="flex:1;background:#000;color:#fff;padding:12px;border:none;font-weight:bold">SIMPAN</button>
-<button onclick="closeModal()" style="flex:1;background:#fff;border:1.5px solid #000;padding:12px">Batal</button>
-</div>
-</div>
-</div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
 <script>
 const SUPABASE_URL="https://aftvoyxwsmdcedvxehuh.supabase.co";
 const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmdHZveXh3c21kY2VkdnhlaHVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxMjQ4NzcsImV4cCI6MjEwNTcwMDg3N30.QERB57Nn6mUzVI_a6BVjxt9s77hV_IJFsHstM";
-let supa = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-let data=[]; let editIdx=-1;
-function showFoto(url){ if(!url) return; document.getElementById('fotoModalImg').src=url; document.getElementById('fotoModal').style.display='flex'; }
-async function load(){ let {data:d} = await supa.from("anggota").select("*").order("tgl_lahir"); data=d||[]; render(); renderPohon(); }
+let supa=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let data=[];
+function showFoto(u){if(!u)return;document.getElementById('fotoBig').src=u;document.getElementById('fotoModal').style.display='flex';}
+async function load(){let r=await supa.from('anggota').select('*');data=r.data||[];render();renderPohon();}
 function render(){
-  let q=(document.getElementById("cari").value||"").toLowerCase();
-  let list=document.getElementById("list"); list.innerHTML="";
-  let filtered=data.filter(x=>(x.nama||"").toLowerCase().includes(q));
-  let sorted=[...filtered].sort((a,b)=>(a.tgl_lahir||'9999').localeCompare(b.tgl_lahir||'9999'));
-  if(!q){ let i=sorted.findIndex(x=>x.nama.toLowerCase().includes('rochayanik')); if(i>2){let [r]=sorted.splice(i,1); sorted.splice(2,0,r);} }
-  sorted.forEach(r=>{
-    let idx=data.indexOf(r);
-    let img=r.foto_url?`<img src="${r.foto_url}" style="width:48px;height:48px;border:1.5px solid #000;object-fit:cover">`:`<div style="width:48px;height:48px;border:1.5px solid #000;background:#eee"></div>`;
-    let img2=r.foto_pasangan_url?`<img src="${r.foto_pasangan_url}" style="width:48px;height:48px;border:1.5px solid #b00;object-fit:cover">`:`<div style="width:48px;height:48px;border:1.5px dashed #f99"></div>`;
-    let div=document.createElement("div"); div.className="row";
-    div.innerHTML=`${img}${img2}<div style="flex:1"><b>${r.nama}</b><div style="font-size:11px">${r.tgl_lahir||''}</div><div style="font-size:11px">ayah:${r.ayah||"-"} | ibu:${r.ibu||"-"}</div><div style="font-size:11px">💑 ${r.pasangan||"-"}</div></div><button onclick="openEdit(${idx})">Edit</button>`;
-    list.appendChild(div);
-  });
+ let q=(document.getElementById('cari').value||'').toLowerCase();
+ let list=document.getElementById('list');list.innerHTML='';
+ let f=data.filter(x=>(x.nama||'').toLowerCase().includes(q));
+ let s=[...f].sort((a,b)=>(a.tgl_lahir||'9999').localeCompare(b.tgl_lahir||'9999'));
+ if(!q){let i=s.findIndex(x=>x.nama.toLowerCase().includes('rochayanik'));if(i>2){let[t]=s.splice(i,1);s.splice(2,0,t);}}
+ let l=document.getElementById('list');s.forEach(d=>{let div=document.createElement('div');div.className='row';div.innerHTML=`<b>${d.nama}</b> <small>${d.tgl_lahir||''} ayah:${d.ayah||'-'}</small>`;list.appendChild(div);});
 }
-function previewFoto(inp){let file=inp.files[0]; if(!file)return; let reader=new FileReader(); reader.onload=e=>{document.getElementById("e_preview").src=e.target.result; document.getElementById("e_preview").style.display="block"; document.getElementById("e_foto_url").value=e.target.result;}; reader.readAsDataURL(file);}
-function previewFotoPasangan(inp){let file=inp.files[0]; if(!file)return; let reader=new FileReader(); reader.onload=e=>{document.getElementById("e_preview_pasangan").src=e.target.result; document.getElementById("e_preview_pasangan").style.display="block"; document.getElementById("e_foto_pasangan_url").value=e.target.result;}; reader.readAsDataURL(file);}
-function hapusFotoPak(){document.getElementById("e_foto_url").value=""; document.getElementById("e_preview").style.display="none"; document.getElementById("e_file").value="";}
-function hapusFotoPasanganPak(){document.getElementById("e_foto_pasangan_url").value=""; document.getElementById("e_preview_pasangan").style.display="none"; document.getElementById("e_file_pasangan").value="";}
-function openEdit(idx){editIdx=idx; let r=data[idx]; document.getElementById("e_nama").value=r.nama||""; document.getElementById("e_ayah").value=r.ayah||""; document.getElementById("e_ibu").value=r.ibu||""; document.getElementById("e_pasangan").value=r.pasangan||""; document.getElementById("e_tgl").value=r.tgl_lahir||""; document.getElementById("e_tgl_pasangan").value=r.tgl_lahir_pasangan||""; document.getElementById("e_foto_url").value=r.foto_url||""; document.getElementById("e_foto_pasangan_url").value=r.foto_pasangan_url||""; let prev=document.getElementById("e_preview"); if(r.foto_url){prev.src=r.foto_url; prev.style.display="block";}else prev.style.display="none"; let prev2=document.getElementById("e_preview_pasangan"); if(r.foto_pasangan_url){prev2.src=r.foto_pasangan_url; prev2.style.display="block";}else prev2.style.display="none"; document.getElementById("modal").style.display="flex";}
-function closeModal(){document.getElementById("modal").style.display="none";}
-async function simpanEdit(){let r=data[editIdx]; let baru={nama:document.getElementById("e_nama").value.trim(), ayah:document.getElementById("e_ayah").value.trim(), ibu:document.getElementById("e_ibu").value.trim(), pasangan:document.getElementById('e_pasangan').value.trim()||null, tgl_lahir:document.getElementById("e_tgl").value||null, tgl_lahir_pasangan:document.getElementById("e_tgl_pasangan").value||null, foto_url:document.getElementById("e_foto_url").value||null, foto_pasangan_url:document.getElementById("e_foto_pasangan_url").value||null}; await supa.from("anggota").update(baru).eq("id",r.id); data[editIdx]={...r,...baru}; closeModal(); render(); renderPohon();}
-async function tambah(){let nama=document.getElementById("namaBaru").value.trim(); if(!nama)return; let {data:d}=await supa.from("anggota").insert([{nama}]).select(); if(d&&d[0]) data.push(d[0]); else data.push({nama}); document.getElementById("namaBaru").value=""; render(); renderPohon();}
 function buildTree(){
-  let map={}; data.forEach(d=>{map[d.nama.toLowerCase().trim()]={...d, children:[]}});
-  let jadiAnak=new Set();
-  data.forEach(d=>{
-    let me=d.nama.toLowerCase().trim();
-    let a=(d.ayah||"").toLowerCase().trim();
-    let ib=(d.ibu||"").toLowerCase().trim();
-    let p=map[a]||map[ib]||null;
-    if(!p && ib){ Object.values(map).forEach(x=>{ if(x.pasangan && x.pasangan.toLowerCase().trim()==ib) p=x; }); }
-    if(!p && a){ Object.values(map).forEach(x=>{ if(x.pasangan && x.pasangan.toLowerCase().trim()==a) p=x; }); }
-    if(p && p.nama.toLowerCase().trim()!=me){ p.children.push(map[me]); jadiAnak.add(me); }
-  });
-  let roots=Object.values(map).filter(n=>!jadiAnak.has(n.nama.toLowerCase().trim()));
-  return roots;
+ let map={};data.forEach(d=>{map[d.nama.toLowerCase().trim()]={...d,children:[]}});
+ let anak=new Set();
+ data.forEach(d=>{
+  let me=d.nama.toLowerCase().trim();let a=(d.ayah||'').toLowerCase().trim();let ib=(d.ibu||'').toLowerCase().trim();
+  let p=map[a]||map[ib]||null;
+  if(!p&&ib){Object.values(map).forEach(x=>{if(x.pasangan&&x.pasangan.toLowerCase().trim()==ib)p=x;});}
+  if(p&&p.nama.toLowerCase().trim()!=me){p.children.push(map[me]);anak.add(me);}
+ });
+ return Object.values(map).filter(n=>!anak.has(n.nama.toLowerCase().trim()));
 }
-function nodeHTML(node,isRoot){
-  let f1=node.foto_url?`<img src="${node.foto_url}" class="node-foto" onclick="event.stopPropagation();showFoto('${node.foto_url}')">`:`<div class="node-no-foto">NO FOTO</div>`;
-  let f2=node.foto_pasangan_url?`<img src="${node.foto_pasangan_url}" class="node-foto pasangan" onclick="event.stopPropagation();showFoto('${node.foto_pasangan_url}')">`:`<div class="node-no-foto" style="border-color:#f99">NO FOTO</div>`;
-  let b1=`<div style="display:flex;flex-direction:column;align-items:center;gap:1px">${f1}<div class="node-label">${node.nama}</div><div class="node-tgl">${node.tgl_lahir||''}</div></div>`;
-  let b2=node.pasangan?`<div style="display:flex;flex-direction:column;align-items:center;gap:1px">${f2}<div class="node-label" style="color:#b00">${node.pasangan}</div><div class="node-tgl" style="color:#b00">${node.tgl_lahir_pasangan||''}</div></div>`:"";
-  let childs="";
-  if(node.children&&node.children.length){
-    node.children.sort((a,b)=>{
-      if(a.nama.toLowerCase().includes('wahyudi')) return -1;
-      if(b.nama.toLowerCase().includes('wahyudi')) return 1;
-      return (a.tgl_lahir||'').localeCompare(b.tgl_lahir||'');
-    });
-    childs=`<div style="display:flex;gap:4px;margin-top:6px;justify-content:center;flex-wrap:wrap">${node.children.map(c=>nodeHTML(c,false)).join("")}</div>`;
-  }
-  return `<div style="display:flex;flex-direction:column;align-items:center"><div class="node-box ${isRoot?'root':''}"><div style="display:flex;gap:4px;justify-content:center">${b1}${b2}</div></div>${node.children&&node.children.length?`<div style="width:1px;height:6px;background:#000"></div>${childs}`:''}</div>`;
+function nodeHTML(node){
+ let f1=node.foto_url?`<img src="${node.foto_url}" class="node-foto" onclick="showFoto('${node.foto_url}')">`:`<div class="node-no">NO FOTO</div>`;
+ let f2=node.foto_pasangan_url?`<img src="${node.foto_pasangan_url}" class="node-foto pasangan" onclick="showFoto('${node.foto_pasangan_url}')">`:`<div class="node-no" style="border-color:#f99">NO FOTO</div>`;
+ let b1=`<div style="display:flex;flex-direction:column;align-items:center">${f1}<div class="node-n">${node.nama}</div><div class="node-t">${(node.tgl_lahir||'').slice(0,10)}</div></div>`;
+ let b2=node.pasangan?`<div style="display:flex;flex-direction:column;align-items:center">${f2}<div class="node-n" style="color:#b00">${node.pasangan}</div><div class="node-t" style="color:#b00">${(node.tgl_lahir_pasangan||'').slice(0,10)}</div></div>`:'';
+ let kids='';
+ if(node.children&&node.children.length){
+  node.children.sort((a,b)=>(a.tgl_lahir||'').localeCompare(b.tgl_lahir||''));
+  kids=`<div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:8px">${node.children.map(c=>nodeHTML(c)).join('')}</div>`;
+ }
+ return `<div style="display:flex;flex-direction:column;align-items:center"><div class="node-box ${node.nama.toLowerCase().includes('masduki')?'root':''}"><div style="display:flex;gap:5px">${b1}${b2}</div></div>${node.children&&node.children.length?`<div style="width:1px;height:8px;background:#000"></div>${kids}`:''}</div>`;
 }
 function renderPohon(){
+ try{
   let roots=buildTree();
-  let masduki=roots.find(r=>r.nama.toLowerCase().includes('masduki'));
-  if(masduki){
-    document.getElementById("pohonView").innerHTML=`<div style="display:flex;justify-content:center;padding:10px">${nodeHTML(masduki,true)}</div>`;
-  }else{
-    document.getElementById("pohonView").innerHTML=roots.map(r=>`<div style="margin-bottom:16px;display:flex;justify-content:center">${nodeHTML(r,true)}</div>`).join("");
-  }
+  let m=roots.find(r=>r.nama.toLowerCase().includes('masduki'));
+  if(m){document.getElementById('pohonView').innerHTML=`<div style="display:flex;justify-content:center">${nodeHTML(m)}</div>`;}
+  else{document.getElementById('pohonView').innerHTML=roots.map(r=>`<div style="margin-bottom:10px;display:flex;justify-content:center">${nodeHTML(r)}</div>`).join('');}
+ }catch(e){document.getElementById('pohonView').innerHTML='Error: '+e.message;}
 }
-function switchTab(t){document.getElementById("bData").classList.toggle("active",t=="data"); document.getElementById("bPohon").classList.toggle("active",t=="pohon"); document.getElementById("dataWrap").style.display=t=="data"?"block":"none"; document.getElementById("pohonWrap").style.display=t=="pohon"?"block":"none"; if(t=="pohon") renderPohon();}
+function switchTab(t){document.getElementById('bData').classList.toggle('active',t=='data');document.getElementById('bPohon').classList.toggle('active',t=='pohon');document.getElementById('dataWrap').style.display=t=='data'?'block':'none';document.getElementById('pohonWrap').style.display=t=='pohon'?'block':'none';if(t=='pohon')renderPohon();}
 load();
 </script>
-</body>
-</html>
+</body></html>
