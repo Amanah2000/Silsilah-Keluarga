@@ -69,13 +69,27 @@ const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSI
 let supa = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let data=[]; let editIdx=-1;
 async function load(){
- let {data:d} = await supa.from("anggota").select("*").order("id");
- data=d||[]; render(); renderPohon();
+ let {data:d} = await supa.from("anggota").select("*").order("tgl_lahir", {ascending: true});
+ data=d||[];
+ render();
+ renderPohon();
 }
+
 function render(){
   let q=(document.getElementById("cari").value||"").toLowerCase();
   let list=document.getElementById("list"); list.innerHTML="";
-  data.filter(x=>(x.nama||"").toLowerCase().includes(q)).forEach(r=>{
+
+  // URUT TANGGAL LAHIR + PAKSA ROCHAYANIK NOMOR 3
+  let filtered = data.filter(x=>(x.nama||"").toLowerCase().includes(q));
+  let sorted = [...filtered].sort((a,b) => (a.tgl_lahir||'9999').localeCompare(b.tgl_lahir||'9999'));
+
+  let idxR = sorted.findIndex(x=>x.nama.toLowerCase().includes('rochayanik'));
+  if(idxR > -1 && idxR!= 2 && q==""){
+    let [roch] = sorted.splice(idxR,1);
+    sorted.splice(2,0,roch); // pindah ke urutan ke-3 (index 2)
+  }
+
+  sorted.forEach(r=>{
     let idx=data.indexOf(r);
     let img=r.foto_url?`<img src="${r.foto_url}" style="width:48px;height:48px;border:1.5px solid #000;object-fit:cover">`:`<div style="width:48px;height:48px;border:1.5px solid #000;background:#eee"></div>`;
     let img2=r.foto_pasangan_url?`<img src="${r.foto_pasangan_url}" style="width:48px;height:48px;border:1.5px solid #b00;object-fit:cover">`:`<div style="width:48px;height:48px;border:1.5px dashed #f99"></div>`;
