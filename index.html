@@ -14,17 +14,18 @@ body{margin:0;border:2px solid #000}
 .modal-box{background:#fff;border:2px solid #000;padding:16px;width:92%;max-width:420px;max-height:90vh;overflow:auto}
 .modal-box input{width:100%;border:1.5px solid #000;padding:10px;margin:6px 0}
 .preview{width:90px;height:90px;border:1.5px dashed #000;object-fit:cover;display:block;margin:8px 0}
-/* POHON KECIL */
-#pohonView{zoom:0.9}
-.node-box{border:1.8px solid #000;padding:4px 6px;background:#fff;min-width:110px;display:inline-block;cursor:pointer}
-.node-box.root{background:#ffffe0}
-.node-foto{width:36px;height:36px;border:1px solid #000;object-fit:cover;cursor:pointer}
+/* POHON SUPER KECIL BIAR TERTAMPUNG */
+#pohonView{overflow:auto;padding:10px;background:#fff}
+#pohonWrap{overflow:auto}
+.node-box{border:1px solid #000;padding:2px 3px;background:#fff;min-width:56px;display:inline-block}
+.node-box.root{background:#ffffe0;border:1.5px solid #000}
+.node-foto{width:22px;height:22px;border:1px solid #000;object-fit:cover;cursor:pointer}
 .node-foto.pasangan{border:1px solid #b00}
-.node-no-foto{width:36px;height:36px;border:1px dashed #aaa;display:flex;align-items:center;justify-content:center;font-size:6px}
-.node-label{font-size:8px;line-height:9px;font-weight:bold;word-break:break-word;max-width:60px;text-align:center;margin-top:2px}
-.node-tgl{font-size:7px;text-align:center}
+.node-no-foto{width:22px;height:22px;border:1px dashed #aaa;display:flex;align-items:center;justify-content:center;font-size:5px;text-align:center}
+.node-label{font-size:6px;line-height:7px;font-weight:bold;max-width:48px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;text-align:center;margin-top:1px}
+.node-tgl{font-size:5px;text-align:center;line-height:6px}
 #fotoModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:100;align-items:center;justify-content:center;padding:20px}
-#fotoModal img{max-width:90%;max-height:85%;border:3px solid #fff;object-fit:contain}
+#fotoModal img{max-width:95%;max-height:90%;border:3px solid #fff}
 </style>
 </head>
 <body>
@@ -125,30 +126,18 @@ function buildTree(){
 function nodeHTML(node,isRoot){
   let f1=node.foto_url?`<img src="${node.foto_url}" class="node-foto" onclick="event.stopPropagation();showFoto('${node.foto_url}')">`:`<div class="node-no-foto">NO FOTO</div>`;
   let f2=node.foto_pasangan_url?`<img src="${node.foto_pasangan_url}" class="node-foto pasangan" onclick="event.stopPropagation();showFoto('${node.foto_pasangan_url}')">`:`<div class="node-no-foto" style="border-color:#f99">NO FOTO</div>`;
-  let b1=`<div style="display:flex;flex-direction:column;align-items:center">${f1}<div class="node-label">${node.nama}</div><div class="node-tgl">${node.tgl_lahir||''}</div></div>`;
-  let b2=node.pasangan?`<div style="display:flex;flex-direction:column;align-items:center">${f2}<div class="node-label" style="color:#b00">${node.pasangan}</div><div class="node-tgl" style="color:#b00">${node.tgl_lahir_pasangan||''}</div></div>`:"";
-  
-  let childHTML = "";
-  if(node.children && node.children.length){
-    // urut: Wahyudi dulu, baru Rochayanik, baru lainnya by tanggal
+  let b1=`<div style="display:flex;flex-direction:column;align-items:center;gap:1px">${f1}<div class="node-label">${node.nama}</div><div class="node-tgl">${node.tgl_lahir||''}</div></div>`;
+  let b2=node.pasangan?`<div style="display:flex;flex-direction:column;align-items:center;gap:1px">${f2}<div class="node-label" style="color:#b00">${node.pasangan}</div><div class="node-tgl" style="color:#b00">${node.tgl_lahir_pasangan||''}</div></div>`:"";
+  let childs="";
+  if(node.children&&node.children.length){
     node.children.sort((a,b)=>{
       if(a.nama.toLowerCase().includes('wahyudi')) return -1;
       if(b.nama.toLowerCase().includes('wahyudi')) return 1;
-      if(a.nama.toLowerCase().includes('rochayanik')) return -1;
-      if(b.nama.toLowerCase().includes('rochayanik')) return 1;
       return (a.tgl_lahir||'').localeCompare(b.tgl_lahir||'');
     });
-    childHTML = `<div style="display:flex;gap:8px;margin-top:8px;justify-content:center;flex-wrap:wrap">${node.children.map(c=>nodeHTML(c,false)).join("")}</div>`;
+    childs=`<div style="display:flex;gap:4px;margin-top:6px;justify-content:center;flex-wrap:wrap">${node.children.map(c=>nodeHTML(c,false)).join("")}</div>`;
   }
-  
-  return `
-  <div style="display:flex;flex-direction:column;align-items:center">
-    <div class="node-box ${isRoot?'root':''}">
-      <div style="display:flex;gap:8px;justify-content:center">${b1}${b2}</div>
-    </div>
-    ${node.children&&node.children.length?`<div style="width:1px;height:10px;background:#000"></div>`:''}
-    ${childHTML}
-  </div>`;
+  return `<div style="display:flex;flex-direction:column;align-items:center"><div class="node-box ${isRoot?'root':''}"><div style="display:flex;gap:4px;justify-content:center">${b1}${b2}</div></div>${node.children&&node.children.length?`<div style="width:1px;height:6px;background:#000"></div>${childs}`:''}</div>`;
 }
 
 function renderPohon(){
