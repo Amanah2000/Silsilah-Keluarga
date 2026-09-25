@@ -1,75 +1,107 @@
 <!DOCTYPE html>
 <html><head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Silsilah Final</title>
+<title>Silsilah - Fix Putih</title>
 <style>
-*{font-family:Consolas,monospace;box-sizing:border-box}
-body{margin:0;background:#fff}
-.tabs{display:flex;position:sticky;top:0;z-index:20}
-.tabs button{flex:1;padding:10px;border:1px solid #000;background:#fff;font-weight:bold}
+*{font-family:Consolas,monospace;box-sizing:border-box}body{margin:0}
+.tabs{display:flex;position:sticky;top:0;z-index:10;background:#fff}
+.tabs button{flex:1;padding:12px;border:1px solid #000;background:#fff;font-weight:bold}
 .tabs button.active{background:#000;color:#fff}
-#pohonView{padding:12px;overflow:auto;text-align:center}
-.node{display:inline-flex;flex-direction:column;align-items:center;vertical-align:top;margin:4px}
-.pair{display:flex;gap:4px}
-.box{width:52px;border:1.5px solid #000;padding:2px;background:#fff}
-.box.spouse{border-style:dashed;border-color:#b00}
+#pohonView{padding:10px;overflow:auto;min-height:90vh;background:#fff;text-align:center}
+.node{display:inline-flex;flex-direction:column;align-items:center;margin:3px;vertical-align:top}
+.pair{display:flex;gap:3px}
+.box{width:54px;border:1.2px solid #000;background:#fff;padding:2px}
+.box.dash{border-style:dashed;border-color:#b00}
 .box.root{background:#ffffe0}
-.box img{width:100%;height:36px;object-fit:cover;border:1px solid #000;display:block;cursor:pointer}
-.box.no{width:100%;height:36px;border:1px dashed #999;display:flex;align-items:center;justify-content:center;font-size:7px}
-.box.n{font-size:7px;font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.box.n.red{color:#b00}
-.line-v{width:1px;height:10px;background:#000}
-.line-h{height:1px;background:#000;margin:0 auto}
-.children{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:10px}
-#fotoModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:99;align-items:center;justify-content:center}
-#fotoModal img{max-width:95%;max-height:90%;border:3px solid #fff}
+.box img{width:100%;height:38px;object-fit:cover;border:1px solid #000;display:block}
+.box.no{width:100%;height:38px;border:1px dashed #999;display:flex;align-items:center;justify-content:center;font-size:8px}
+.box.nm{font-size:7px;font-weight:bold;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.vline{width:1px;height:8px;background:#000;margin:2px auto}
+.children{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:4px}
+#fotoModal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:999;align-items:center;justify-content:center}
+#fotoModal img{max-width:92%;max-height:90%;border:3px solid #fff}
+#status{padding:6px;font-size:11px;background:#ffe;border-bottom:1px solid #000}
+.row{display:flex;gap:6px;padding:6px;border-bottom:1px solid #ccc;font-size:11px;align-items:center}
 </style>
 </head>
 <body>
 <div class="tabs"><button id="bData" class="active" onclick="switchTab('data')">DATA</button><button id="bPohon" onclick="switchTab('pohon')">POHON</button></div>
-<div id="dataWrap"><div id="list"></div></div>
-<div id="pohonWrap" style="display:none"><div id="pohonView"></div></div>
-<div id="fotoModal" onclick="this.style.display='none'"><img id="big" src=""></div>
+<div id="dataWrap"><div id="status">Memuat...</div><div id="list"></div></div>
+<div id="pohonWrap" style="display:none"><div id="pohonView">Memuat pohon...</div></div>
+<div id="fotoModal" onclick="this.style.display='none'"><img id="bigFoto" src=""></div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.7/dist/umd/supabase.min.js"></script>
 <script>
-const supa=supabase.createClient("https://aftvoyxwsmdcedvxehuh.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmdHZveXh3c21kY2VkdnhlaHVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxMjQ4NzcsImV4cCI6MjEwNTcwMDg3N30.QERB57Nn6mTbUSKWwzVI_a6BVjxt9s77hV_IJFsHstM");
+const SUPABASE_URL="https://aftvoyxwsmdcedvxehuh.supabase.co";
+const SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFmdHZveXh3c21kY2VkdnhlaHVoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAxMjQ4NzcsImV4cCI6MjEwNTcwMDg3N30.QERB57Nn6mTbUSKWwzVI_a6BVjxt9s77hV_IJFsHstM";
+const supa = supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 let data=[];
-function showFoto(u){document.getElementById('big').src=u;document.getElementById('fotoModal').style.display='flex';}
-async function load(){let {data:d}=await supa.from('anggota').select('*').order('tgl_lahir');data=d||[];renderPohon();}
-function build(){
- let m={};data.forEach(x=>m[x.nama.toLowerCase().trim()]={...x,children:[]});
- let anak=new Set();
- data.forEach(x=>{
-  let me=x.nama.toLowerCase().trim();let a=(x.ayah||'').toLowerCase().trim();let ib=(x.ibu||'').toLowerCase().trim();
-  let p=m[a]||m[ib]||null;
-  if(!p&&ib) Object.values(m).forEach(v=>{if(v.pasangan&&v.pasangan.toLowerCase().trim()==ib) p=v;});
-  if(p&&p.nama.toLowerCase().trim()!=me){p.children.push(m[me]);anak.add(me);}
- });
- return Object.values(m).filter(x=>!anak.has(x.nama.toLowerCase().trim()));
+function showFoto(u){if(!u)return;document.getElementById('bigFoto').src=u;document.getElementById('fotoModal').style.display='flex';}
+async function load(){
+ try{
+  document.getElementById('status').innerText='Menghubungkan Supabase...';
+  let {data:d,error}=await supa.from('anggota').select('*').order('tgl_lahir',{ascending:true});
+  if(error) throw error;
+  data=d||[];
+  document.getElementById('status').innerText='Total: '+data.length+' data - OK - Rochayanik posisi 3';
+  renderData();
+  renderPohon();
+ }catch(e){
+  document.getElementById('status').innerText='ERROR: '+e.message;
+  document.getElementById('pohonView').innerText='ERROR: '+e.message;
+ }
 }
-function boxHTML(n,isSpouse){
- let foto=n.foto_url||n.foto_pasangan_url;
- let img=foto?`<img src="${foto}" onclick="showFoto('${foto}')">`:`<div class="no">NO</div>`;
- let name=isSpouse?(n.pasangan||''):(n.nama||'');
- return `<div class="box ${isSpouse?'spouse':''} ${n.nama.toLowerCase().includes('masduki')&&!isSpouse?'root':''}">${img}<div class="n ${isSpouse?'red':''}">${name.split(' ')[0]}</div></div>`;
+function renderData(){
+ let list=document.getElementById('list');list.innerHTML='';
+ let s=[...data].sort((a,b)=>(a.tgl_lahir||'').localeCompare(b.tgl_lahir||''));
+ let i=s.findIndex(x=>x.nama.toLowerCase().includes('rochayanik')); if(i>2){let[t]=s.splice(i,1);s.splice(2,0,t);}
+ s.forEach(r=>{
+  let d=document.createElement('div');d.className='row';
+  d.innerHTML=`<div>${r.nama} (${(r.tgl_lahir||'').slice(0,10)}) ayah:${r.ayah||'-'} ibu:${r.ibu||'-'}</div>`;
+  list.appendChild(d);
+ });
+}
+function buildTree(){
+ let map={};data.forEach(d=>{map[d.nama.toLowerCase().trim()]={...d,children:[]}});
+ let anak=new Set();
+ data.forEach(d=>{
+  let me=d.nama.toLowerCase().trim();let a=(d.ayah||'').toLowerCase().trim();let ib=(d.ibu||'').toLowerCase().trim();
+  let p=map[a]||map[ib]||null;
+  if(!p&&ib){Object.values(map).forEach(x=>{if(x.pasangan&&x.pasangan.toLowerCase().trim()==ib) p=x;});}
+  if(p&&p.nama.toLowerCase().trim()!=me){p.children.push(map[me]);anak.add(me);}
+ });
+ return Object.values(map).filter(x=>!anak.has(x.nama.toLowerCase().trim()));
+}
+function box(n,isPas){
+ let url=isPas?n.foto_pasangan_url:n.foto_url;
+ let nama=isPas?n.pasangan:n.nama;
+ let img=url?`<img src="${url}" onclick="showFoto('${url}')">`:`<div class="no">NO</div>`;
+ return `<div class="box ${isPas?'dash':''} ${!isPas&&n.nama.toLowerCase().includes('masduki')?'root':''}">${img}<div class="nm" style="${isPas?'color:#b00':''}">${(nama||'').split(' ')[0]}</div></div>`;
 }
 function nodeHTML(node){
- let pair=`<div class="pair">${boxHTML(node,false)}${node.pasangan?boxHTML({pasangan:node.pasangan,foto_pasangan_url:node.foto_pasangan_url},true):''}</div>`;
+ let pair=`<div class="pair">${box(node,false)}${node.pasangan?box(node,true):''}</div>`;
  let kids='';
  if(node.children&&node.children.length){
   node.children.sort((a,b)=>(a.tgl_lahir||'').localeCompare(b.tgl_lahir||''));
-  kids=`<div class="line-v"></div><div class="children">${node.children.map(c=>`<div class="node">${nodeHTML(c)}</div>`).join('')}</div>`;
+  kids=`<div class="vline"></div><div class="children">${node.children.map(c=>`<div class="node">${nodeHTML(c)}</div>`).join('')}</div>`;
  }
  return `${pair}${kids}`;
 }
 function renderPohon(){
- let roots=build();
- let mas=roots.find(r=>r.nama.toLowerCase().includes('masduki'));
- let html=mas?`<div class="node">${nodeHTML(mas)}</div>`:roots.map(r=>`<div class="node">${nodeHTML(r)}</div>`).join('');
- document.getElementById('pohonView').innerHTML=html;
- document.getElementById('list').innerHTML=`<div style="padding:8px;font-size:12px">Total ${data.length} - Aditya anak: ${ (build().find(r=>r.nama.toLowerCase().includes('masduki'))?.children?.[0]?.children?.find(c=>c.nama.toLowerCase().includes('aditya'))?.children?.length||0) } orang (Azalia, Ahmad R, Muhammad HF, Muhammad HS)</div>`;
+ try{
+  let roots=buildTree();
+  let mas=roots.find(r=>r.nama.toLowerCase().includes('masduki'));
+  if(mas){document.getElementById('pohonView').innerHTML=`<div class="node">${nodeHTML(mas)}</div>`;}
+  else{document.getElementById('pohonView').innerHTML=roots.map(r=>`<div class="node">${nodeHTML(r)}</div>`).join('');}
+ }catch(e){document.getElementById('pohonView').innerText='Pohon Error: '+e.message;}
 }
-function switchTab(t){document.getElementById('bData').classList.toggle('active',t=='data');document.getElementById('bPohon').classList.toggle('active',t=='pohon');document.getElementById('dataWrap').style.display=t=='data'?'block':'none';document.getElementById('pohonWrap').style.display=t=='pohon'?'block':'none';if(t=='pohon')renderPohon();}
+function switchTab(t){
+ document.getElementById('bData').classList.toggle('active',t=='data');
+ document.getElementById('bPohon').classList.toggle('active',t=='pohon');
+ document.getElementById('dataWrap').style.display=t=='data'?'block':'none';
+ document.getElementById('pohonWrap').style.display=t=='pohon'?'block':'none';
+ if(t=='pohon') renderPohon();
+}
 load();
 </script>
 </body></html>
