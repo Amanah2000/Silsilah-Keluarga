@@ -3,78 +3,93 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Silsilah Tawar - Model Folder Lipat 21 Data</title>
+<title>Silsilah Canggih - 21 Data + Tgl Lahir</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,sans-serif}
-body{background:#f1f5f9;color:#1e293b;padding:12px}
-.header{background:white;border-radius:14px;padding:14px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.08);margin-bottom:12px;border:1px solid #e2e8f0}
-.header h1{font-size:16px;font-weight:800}
-.header p{font-size:11px;color:#64748b;margin-top:4px}
-.card{background:white;border-radius:14px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,0.08);border:1px solid #e2e8f0}
-.tree, .children{list-style:none}
+body{background:#f1f5f9;color:#1e293b;padding:10px}
+.header{background:white;border-radius:16px;padding:16px;box-shadow:0 4px 12px rgba(0,0,0,0.06);border:1px solid #e2e8f0;margin-bottom:10px}
+.header h1{font-size:18px;font-weight:900;text-align:center}
+.header p{font-size:11px;color:#64748b;text-align:center;margin-top:4px}
+.toolbar{display:flex;gap:8px;margin-top:12px}
+.toolbar input{flex:1;padding:10px 12px;border:1px solid #e2e8f0;border-radius:10px;font-size:13px;outline:none}
+.toolbar button{padding:10px 14px;border:none;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer}
+.btn-expand{background:#0f172a;color:white}
+.btn-print{background:#e0f2fe;color:#0c4a6e}
+.card{background:white;border-radius:16px;padding:14px;box-shadow:0 4px 12px rgba(0,0,0,0.06);border:1px solid #e2e8f0}
+.tree,.children{list-style:none}
 .children{margin-left:20px;border-left:2px dashed #cbd5e1;padding-left:12px;display:none}
 .children.open{display:block}
-.item{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;cursor:pointer;margin:3px 0;transition:0.15s;border:1px solid transparent}
-.item:hover{background:#f1f5f9;border-color:#e2e8f0}
-.item.active{background:#0f172a;color:white;border-color:#0f172a}
-.icon{font-size:16px;min-width:22px;text-align:center}
-.name{font-size:13px;font-weight:700;line-height:1.2}
-.meta{font-size:10px;color:#64748b;font-weight:400;display:block;margin-top:2px}
-.item.active .meta{color:#cbd5e1}
-.badge{margin-left:auto;font-size:9px;padding:3px 7px;border-radius:20px;background:#e2e8f0;color:#475569;white-space:nowrap}
+.item{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:12px;cursor:pointer;margin:4px 0;transition:0.15s;border:1px solid #f1f5f9;background:#f8fafc}
+.item:hover{background:#f1f5f9}
+.item.active{background:#0f172a;color:white}
+.icon{font-size:18px;min-width:26px;text-align:center;background:white;border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center}
+.name{font-size:13.5px;font-weight:800}
+.meta{font-size:11px;color:#64748b;font-weight:500;display:flex;gap:10px;margin-top:3px;flex-wrap:wrap}
+.item.active .meta{color:#94a3b8}
+.badge{margin-left:auto;font-size:10px;padding:4px 8px;border-radius:20px;background:#e2e8f0;color:#475569;white-space:nowrap;font-weight:700}
 .item.active .badge{background:rgba(255,255,255,0.2);color:white}
-.leaf .item{background:#f8fafc;border:1px dashed #e2e8f0}
-.dot{width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block;margin-right:2px}
-.hint{background:#fef9c3;border:1px solid #fde047;color:#854d0e;padding:8px;border-radius:8px;font-size:11px;text-align:center;margin-top:12px}
+.leaf .item{background:white;border:1px dashed #e2e8f0}
+.tgl{color:#0f172a;background:#fef9c3;border:1px solid #fde047;padding:1px 6px;border-radius:6px;font-size:10px;font-weight:700}
+.hint{background:#fef9c3;border:1px solid #fde047;color:#854d0e;padding:10px;border-radius:10px;font-size:11px;text-align:center;margin-top:12px}
+@media print{.header .toolbar,.hint{display:none} .children{display:block !important}}
 </style>
 </head>
 <body>
 <div class="header">
-<h1>📁 Silsilah Keluarga Tawar - POHON</h1>
-<p>Total: 21 data - Klik Nama Ayah Untuk Lihat Anaknya Pak</p>
+<h1>📁 Silsilah Keluarga Tawar - CANGGIH</h1>
+<p>Total 21 Data • Klik Folder Untuk Lipat • Ada Tgl Lahir Fiktif Bisa Diedit</p>
+<div class="toolbar">
+<input id="search" placeholder="🔍 Cari nama... ketik Azalia">
+<button class="btn-expand" onclick="toggleAll()">📂 Buka/Tutup Semua</button>
+<button class="btn-print" onclick="window.print()">🖨️ Print</button>
+</div>
 </div>
 <div class="card">
 <ul class="tree" id="tree"></ul>
-<div class="hint">💡 Klik folder 📁 pak untuk buka lipatan nya pak. Klik lagi untuk tutup!</div>
+<div class="hint">💡 Cara Edit Tgl Lahir: Buka file di Notepad cari tgl: "12-03-2022" ganti tanggal asli!</div>
 </div>
 <script>
 const silsilah = {
- name: "Masduki + Nurhidayati", meta: "Akar Keluarga",
+ name: "Masduki + Nurhidayati", meta: "Akar Keluarga", tgl: "01-01-1960",
  children: [
-  { name: "Wahyudi + Khalimatus Sa'diyah", meta: "06-81965 & 31-03-1068",
+  { name: "Wahyudi + Khalimatus Sa'diyah", meta: "Suami Istri", tgl: "15-06-1985",
    children: [
-    { name: "Aditya Shufi Mubarok + Asfiana", meta: "Anak 1",
+    { name: "Aditya Shufi Mubarok + Asfiana", meta:"Anak 1", tgl:"10-02-2005",
      children: [
-      { name: "Azalia Nada Hibatulla", leaf:true },
-      { name: "Ahmad Romadlon", leaf:true, no:"2." },
-      { name: "Muh. Hafidz", leaf:true, no:"3." },
-      { name: "Moh. Husain", leaf:true, no:"4." }
+      { name: "Azalia Nada Hibatulla", leaf:true, tgl:"12-03-2022" },
+      { name: "Ahmad Romadlon", leaf:true, no:"2.", tgl:"05-07-2023" },
+      { name: "Muh. Hafidz", leaf:true, no:"3.", tgl:"18-09-2024" },
+      { name: "Moh. Husain", leaf:true, no:"4.", tgl:"20-11-2025" }
      ]
     },
-    { name: "Churotul Aini + Fuad Amrozi", meta: "Anak 2",
+    { name: "Churotul Aini + Fuad Amrozi", meta:"Anak 2", tgl:"22-08-2007",
      children: [
-      { name: "Umar", meta:"2010-01-01", leaf:true, no:"1." },
-      { name: "Fatimah", meta:"2010-01-02", leaf:true, no:"2." }
+      { name: "Umar", meta:"Cucu", leaf:true, no:"1.", tgl:"01-01-2010" },
+      { name: "Fatimah", meta:"Cucu", leaf:true, no:"2.", tgl:"02-01-2010" }
      ]
     },
-    { name: "Muhammad Ja'far Shodiq + Virdayani", meta:"Anak 3", children: [] },
-    { name: "Ahmad Mujahid Alfata'ki", meta:"Anak 4", children: [] }
+    { name: "Muhammad Ja'far Shodiq + Virdayani", meta:"Anak 3", tgl:"14-04-2009", children: [] },
+    { name: "Ahmad Mujahid Alfata'ki", meta:"Anak 4", tgl:"30-12-2011", children: [] }
    ]
   },
-  { name: "Rochayanik + Awet Setiawan", meta: "Cabang 2",
+  { name: "Rochayanik + Awet Setiawan", meta:"Cabang 2", tgl:"10-10-1988",
    children: [
-    { name: "Abidzar", leaf:true, no:"1." },
-    { name: "Azar", leaf:true, no:"2." }
+    { name: "Abidzar", leaf:true, no:"1.", tgl:"05-05-2015" },
+    { name: "Azar", leaf:true, no:"2.", tgl:"06-06-2017" }
    ]
   }
  ]
 };
 function makeNode(node){
  const li=document.createElement('li'); const isLeaf=node.leaf;
- li.className=isLeaf?'leaf':'folder';
+ li.className=isLeaf?'leaf':'folder'; li.dataset.name=node.name.toLowerCase();
  const div=document.createElement('div'); div.className='item';
- const icon=isLeaf?'👤':'📁'; const metaHtml=node.meta?`<span class="meta">${node.meta}</span>`:'';
- const prefix=node.no?node.no+' ':''; const badge=isLeaf?'<span class="badge"><span class="dot"></span>Santri</span>':`<span class="badge">${node.children?node.children.length:0} anak</span>`;
+ const icon=isLeaf?'👤':'📁';
+ const tglHtml = node.tgl ? `<span class="tgl">📅 ${node.tgl}</span>` : '';
+ const metaTxt = node.meta ? `<span>${node.meta}</span>` : '';
+ const metaHtml = `<span class="meta">${metaTxt}${tglHtml}</span>`;
+ const prefix=node.no?node.no+' ':''; 
+ const badge=isLeaf?'<span class="badge">👶 Cucu</span>':`<span class="badge">${node.children?node.children.length:0} anak</span>`;
  div.innerHTML=`<span class="icon">${icon}</span><span><span class="name">${prefix}${node.name}</span>${metaHtml}</span>${badge}`;
  li.appendChild(div);
  if(!isLeaf && node.children && node.children.length>0){
@@ -85,7 +100,23 @@ function makeNode(node){
  return li;
 }
 const root=document.getElementById('tree'); const rootNode=makeNode(silsilah); root.appendChild(rootNode);
-rootNode.querySelector('.item').classList.add('active'); rootNode.querySelector('.children').classList.add('open'); rootNode.querySelector('.item .icon').textContent='📂';
+rootNode.querySelector('.item').classList.add('active'); 
+let firstChildren=rootNode.querySelector('.children');
+if(firstChildren){firstChildren.classList.add('open'); rootNode.querySelector('.item .icon').textContent='📂';}
+document.getElementById('search').addEventListener('input', function(e){
+ const q=e.target.value.toLowerCase();
+ document.querySelectorAll('.tree li').forEach(li=>{
+   const name=li.dataset.name||'';
+   if(!q){li.style.display=''; return;}
+   if(name.includes(q)){li.style.display=''; let p=li.parentElement; while(p){if(p.classList.contains('children')){p.classList.add('open'); let prev=p.previousElementSibling; if(prev){prev.classList.add('active'); let ic=prev.querySelector('.icon'); if(ic) ic.textContent='📂';}} p=p.parentElement;}} else {if(li.classList.contains('leaf')) li.style.display='none';}
+ });
+});
+let allOpen=false;
+function toggleAll(){
+ allOpen=!allOpen;
+ document.querySelectorAll('.children').forEach(ul=>{if(allOpen) ul.classList.add('open'); else ul.classList.remove('open');});
+ document.querySelectorAll('.item').forEach(it=>{if(allOpen){it.classList.add('active'); let ic=it.querySelector('.icon'); if(ic && ic.textContent==='📁') ic.textContent='📂';} else {it.classList.remove('active'); let ic=it.querySelector('.icon'); if(ic && ic.textContent==='📂') ic.textContent='📁';}});
+}
 </script>
 </body>
 </html>
