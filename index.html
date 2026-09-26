@@ -1,85 +1,91 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-<meta charset="utf-8">
-<title>POHON - FINAL SAMA</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Silsilah Tawar - Model Folder Lipat 21 Data</title>
 <style>
-body{font-family:Arial;background:#fff;padding:10px}
-.judul{text-align:center;font-weight:bold;font-size:20px}
-.kotak{border:2px solid #000;border-radius:8px;background:#fff;display:flex;align-items:center;justify-content:center;text-align:center;box-sizing:border-box}
-.gv{width:3px;height:18px;background:#000;margin:0 auto}
-.gh{height:3px;background:#000;margin:0 auto}
-.b1{width:360px;height:42px;margin:0 auto;font-weight:bold}
-.b2{width:300px;height:42px;font-size:13px;margin:0 auto}
-/* LEVEL 2 : Wahyudi & Rochayanik */
-/* PAKSA SAMA PER LEVEL PAK */
-.b3{ /* Aditya, Churotul, Muhammad, Ahmad Mujahid */
-  width:230px !important;
-  height:44px !important;
-  min-height:44px !important;
-  font-size:11px !important;
-}
-.b4{ /* Azalia, Romadlon, Hafidz, Husain, Umar, Fatimah, Abidzar, Azar */
-  width:110px !important;
-  height:44px !important;
-  min-height:44px !important;
-  font-size:10px !important;
-}
-
-.utama{display:flex;justify-content:center;gap:20px;align-items:flex-start}
-.kiri{flex:1}
-.kanan{width:250px;text-align:center}
- 
-.anak4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-top:0;padding:0 10px}
-.cucu{display:flex;gap:6px;justify-content:center;border-top:3px solid #000;padding-top:10px;margin-top:0}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',system-ui,sans-serif}
+body{background:#f1f5f9;color:#1e293b;padding:12px}
+.header{background:white;border-radius:14px;padding:14px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.08);margin-bottom:12px;border:1px solid #e2e8f0}
+.header h1{font-size:16px;font-weight:800}
+.header p{font-size:11px;color:#64748b;margin-top:4px}
+.card{background:white;border-radius:14px;padding:14px;box-shadow:0 2px 8px rgba(0,0,0,0.08);border:1px solid #e2e8f0}
+.tree, .children{list-style:none}
+.children{margin-left:20px;border-left:2px dashed #cbd5e1;padding-left:12px;display:none}
+.children.open{display:block}
+.item{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;cursor:pointer;margin:3px 0;transition:0.15s;border:1px solid transparent}
+.item:hover{background:#f1f5f9;border-color:#e2e8f0}
+.item.active{background:#0f172a;color:white;border-color:#0f172a}
+.icon{font-size:16px;min-width:22px;text-align:center}
+.name{font-size:13px;font-weight:700;line-height:1.2}
+.meta{font-size:10px;color:#64748b;font-weight:400;display:block;margin-top:2px}
+.item.active .meta{color:#cbd5e1}
+.badge{margin-left:auto;font-size:9px;padding:3px 7px;border-radius:20px;background:#e2e8f0;color:#475569;white-space:nowrap}
+.item.active .badge{background:rgba(255,255,255,0.2);color:white}
+.leaf .item{background:#f8fafc;border:1px dashed #e2e8f0}
+.dot{width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block;margin-right:2px}
+.hint{background:#fef9c3;border:1px solid #fde047;color:#854d0e;padding:8px;border-radius:8px;font-size:11px;text-align:center;margin-top:12px}
 </style>
 </head>
 <body>
-<div>Total: 21 data - OK</div>
-<div class="judul">Silsilah Keluarga Tawar - POHON</div>
-
-<div class="kotak b1">Masduki + Nurhidayati</div>
-<div class="gv"></div>
-<div class="gh" style="width:85%"></div>
-
-<div class="utama">
-<div class="kiri">
-    <div class="kotak b2">
-      <div class="nama">Wahyudi +
-        Khalimatus Sa'diyah</div>
-  <div class="tgl">06-81965 &  31-03-1068</div></div>
-    <div class="gv"></div>
-    <div class="gh" style="width:85%"></div>
-    <div class="anak4">
-      <div style="text-align:center">
-        <div class="kotak b3">Aditya Shufil Mubarok + Asfiana</div>
-        <div class="gv"></div><div class="gh"></div>
-        <div class="cucu">
-          <div class="kotak b4">1. Azalia Nada Hibatulla</div>
-          <div class="kotak b4">2. Ahmad Romadlon</div>
-          <div class="kotak b4">3. Muh. Hafidz</div>
-          <div class="kotak b4">4. Moh. Husain</div>
-        </div>
-      </div>
-      <div style="text-align:center">
-        <div class="kotak b3">Churotul Aini + Fuad Amrozi</div>
-        <div class="gv"></div><div class="gh" style="width:60%"></div>
-        <div class="cucu">
-          <div class="kotak b4">1. Umar (2010-01-01)</div>
-          <div class="kotak b4">2. Fatimah (2010-01-02)</div>
-        </div>
-      </div>
-      <div><div class="kotak b3">Muhammad Ja'far Shodiq + Virdayani</div></div>
-      <div class="kotak b3">Ahmad Mujahid Alfataki</div>
-    </div>
-  </div>
-    <div class="kanan">
-    <div class="kotak b3">Rochayanik + Awet Setiawan</div>
-    <div class="gv"></div>
-    <div class="gh" style="width:80%"></div>
-    <div style="display:flex"> 
-      <div class="kotak b4">1. Abidzar</div>
-      <div class="kotak b4">2. Azar</div>
-    </div>
+<div class="header">
+<h1>📁 Silsilah Keluarga Tawar - POHON</h1>
+<p>Total: 21 data - Klik Nama Ayah Untuk Lihat Anaknya Pak</p>
+</div>
+<div class="card">
+<ul class="tree" id="tree"></ul>
+<div class="hint">💡 Klik folder 📁 pak untuk buka lipatan nya pak. Klik lagi untuk tutup!</div>
+</div>
+<script>
+const silsilah = {
+ name: "Masduki + Nurhidayati", meta: "Akar Keluarga",
+ children: [
+  { name: "Wahyudi + Khalimatus Sa'diyah", meta: "06-81965 & 31-03-1068",
+   children: [
+    { name: "Aditya Shufi Mubarok + Asfiana", meta: "Anak 1",
+     children: [
+      { name: "Azalia Nada Hibatulla", leaf:true },
+      { name: "Ahmad Romadlon", leaf:true, no:"2." },
+      { name: "Muh. Hafidz", leaf:true, no:"3." },
+      { name: "Moh. Husain", leaf:true, no:"4." }
+     ]
+    },
+    { name: "Churotul Aini + Fuad Amrozi", meta: "Anak 2",
+     children: [
+      { name: "Umar", meta:"2010-01-01", leaf:true, no:"1." },
+      { name: "Fatimah", meta:"2010-01-02", leaf:true, no:"2." }
+     ]
+    },
+    { name: "Muhammad Ja'far Shodiq + Virdayani", meta:"Anak 3", children: [] },
+    { name: "Ahmad Mujahid Alfata'ki", meta:"Anak 4", children: [] }
+   ]
+  },
+  { name: "Rochayanik + Awet Setiawan", meta: "Cabang 2",
+   children: [
+    { name: "Abidzar", leaf:true, no:"1." },
+    { name: "Azar", leaf:true, no:"2." }
+   ]
+  }
+ ]
+};
+function makeNode(node){
+ const li=document.createElement('li'); const isLeaf=node.leaf;
+ li.className=isLeaf?'leaf':'folder';
+ const div=document.createElement('div'); div.className='item';
+ const icon=isLeaf?'👤':'📁'; const metaHtml=node.meta?`<span class="meta">${node.meta}</span>`:'';
+ const prefix=node.no?node.no+' ':''; const badge=isLeaf?'<span class="badge"><span class="dot"></span>Santri</span>':`<span class="badge">${node.children?node.children.length:0} anak</span>`;
+ div.innerHTML=`<span class="icon">${icon}</span><span><span class="name">${prefix}${node.name}</span>${metaHtml}</span>${badge}`;
+ li.appendChild(div);
+ if(!isLeaf && node.children && node.children.length>0){
+   const ul=document.createElement('ul'); ul.className='children';
+   node.children.forEach(c=> ul.appendChild(makeNode(c))); li.appendChild(ul);
+   div.addEventListener('click',(e)=>{e.stopPropagation(); const open=ul.classList.toggle('open'); div.classList.toggle('active',open); div.querySelector('.icon').textContent=open?'📂':'📁';});
+ }
+ return li;
+}
+const root=document.getElementById('tree'); const rootNode=makeNode(silsilah); root.appendChild(rootNode);
+rootNode.querySelector('.item').classList.add('active'); rootNode.querySelector('.children').classList.add('open'); rootNode.querySelector('.item .icon').textContent='📂';
+</script>
 </body>
 </html>
